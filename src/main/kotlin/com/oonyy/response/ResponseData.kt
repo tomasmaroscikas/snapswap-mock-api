@@ -30,14 +30,38 @@ class ResponseData {
                   "failures": {
                     "phone": {
                         "code": "check_failed",
-                        "sub_code": "sub_code",
+                        "sub_code": "check_failed",
                         "reason": "Phone check failed. WAL-81777 testing."
                         }
                     }
                 }"""
         }
 
-        const val DOSSIER_STATUS = """{
+        const val DOSSIER_STATUS_LIMITED = """{
+                  "email": "pending",
+                  "enterprise": "pending",
+                  "consistency": "pending",
+                  "questions": {
+                    "representative_nationality": "success",
+                    "representative_capacity": "success"
+                  },
+                  "residential_address": "confirming",
+                  "id_document": "pending",
+                  "documents": {
+                    "residential_address": "pending"
+                  },
+                  "id": "63377b59-4603-11ed-8a38-bd275b666d68",
+                  "delivery": "pending",
+                  "group": {
+                    "dossiers": [
+                      "63377b59-4603-11ed-8a38-bd275b666d68"
+                    ],
+                    "id": "63377b59-4603-11ed-8a38-bd275b666d68"
+                  },
+                  "phone": "pending"
+                }"""
+
+        const val DOSSIER_STATUS_BASIC = """{
                   "email": "pending",
                   "enterprise": "pending",
                   "consistency": "pending",
@@ -75,7 +99,14 @@ class ResponseData {
                     }
                 }"""
 
-        const val BEARER_TOKEN = """{
+        const val BEARER_TOKEN_LIMITED = """{
+                    "auth": {
+                        "scheme": "Bearer",
+                        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJkb3NzaWVySWQiOiIxMWQyNjU4MS01YzRkLTRhZmQtYjc0MC0wYzM3YzY4NjZiNTQiLCJjbGllbnRJZCI6ImN1c3RvbXdlYi1saW1pdGVkIiwiZXhwIjoxNjY4NTA3Mzc1MDAwLCJpYXQiOjE2Njc5MDI1NzUwMDAsInN1YiI6IjYwYTZiOGRhLTVmNGUtMTFlZC1hMTdmLTFiMjlhZmFhMWJlMiIsImlzcyI6InNuYXBzd2FwIn0.23fIZwyjNTKm5oWpj70sWb0XRnWT6hx4V7PirqfALVPSdxrSWQundDSSMwP3yQidO38Bskn4CTwMG8eDpt16Qg"
+                    }
+                }"""
+
+        const val BEARER_TOKEN_BASIC = """{
                     "auth": {
                         "scheme": "Bearer",
                         "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJkb3NzaWVySWQiOiI2MGE1MGIyOC01ZjRlLTExZWQtYTE3Zi02YmM4NmI0MjJmYmEiLCJjbGllbnRJZCI6ImN1c3RvbXdlYi1iYXNpYyIsImV4cCI6MTY2ODUwNzM3NTAwMCwiaWF0IjoxNjY3OTAyNTc1MDAwLCJzdWIiOiI2MGE2YjhkYS01ZjRlLTExZWQtYTE3Zi0xYjI5YWZhYTFiZTIiLCJpc3MiOiJzbmFwc3dhcCJ9.7fOI5jWh0TGKcqKz7oaOYilTFClXT4o8xkalw2-4nhRPUpu-_PZjEZBjYKTpMzipw3-DRiqL4OmRdVoGylZacQ"

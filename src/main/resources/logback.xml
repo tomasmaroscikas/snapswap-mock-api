@@ -26,5 +26,8 @@
     <logger name="com.oonyy.controller.SnapSwapApi" additivity="false" level="DEBUG">
         <appender-ref ref="FILE" />
     </logger>
+    <logger name="com.oonyy.jwt.DossierJwtParser" additivity="false" level="DEBUG">
+        <appender-ref ref="FILE" />
+    </logger>
 
 </configuration>
