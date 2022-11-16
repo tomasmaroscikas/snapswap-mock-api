@@ -1,3 +1,3 @@
 package com.oonyy.jwt
 
-data class DossierJwtToken(val authToken: DossierAuthToken)
+data class DossierJwtToken(val auth: DossierAuthToken)
