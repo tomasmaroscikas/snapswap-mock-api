@@ -1,12 +1,19 @@
 package com.oonyy.controller
 
+import com.oonyy.jwt.DossierAuthToken
 import com.oonyy.jwt.DossierJwtParser
+import com.oonyy.jwt.DossierJwtPayload
+import com.oonyy.jwt.DossierJwtToken
 import com.oonyy.model.internal.*
 import com.oonyy.response.ResponseData
 import com.oonyy.model.request.*
 import com.oonyy.model.stat.EndPointHitStatistics
 import io.micronaut.http.HttpHeaders.AUTHORIZATION
+import io.micronaut.http.HttpResponse
+import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -16,68 +23,40 @@ class SnapSwapApi {
 
     private val logger: Logger = LoggerFactory.getLogger(SnapSwapApi::class.java)
     private var state: MutableMap<String, DossierData> = mutableMapOf()
-    private var endPointHitStatistics = EndPointHitStatistics(0, 0)
+    private var endPointHitStatistics = EndPointHitStatistics(0, 0, 0, 0, 0)
     var stateCount  = 0
 
     @Get("/api/v1/dossier")
-    fun status(@Header(AUTHORIZATION) jwtTokenString: String): DossierLimitedStatus {
-
+    fun status(@Header(AUTHORIZATION) jwtTokenString: String): HttpResponse<DossierStatus> {
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierType = DossierType from dossierJwtPayload.clientId
-        logger.debug("DossierBearerToken type from JWT token payload is $dossierType")
-
-       /* if (state.containsKey(dossierJwtPayload.dossierId)) {
-
+        logger.debug("Dossier status for $dossierType")
+        return if (state.containsKey(dossierJwtPayload.dossierId)) {
+            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
         } else {
-            state[dossierJwtPayload.dossierId] = DossierData()
-        }*/
-        return if (dossierType == DossierType.DOSSIER_BASIC) {
-            DossierLimitedStatus(
-                DossierEntryState.PENDING,
-                DossierEntryState.PENDING,
-                DossierEntryState.PENDING,
-                mapOf(DossierQuestion.REPRESENTATIVE_NATIONALITY to DossierEntryState.PENDING, DossierQuestion.REPRESENTATIVE_CAPACITY to DossierEntryState.PENDING),
-                DossierEntryState.PENDING,
-                DossierEntryState.PENDING,
-                mapOf(DossierDocument.RESIDENTIAL_ADDRESS to DossierEntryState.PENDING),
-                dossierJwtPayload.dossierId,
-                DossierEntryState.PENDING,
-                "group",
-                DossierEntryState.PENDING,
-                mapOf("phone" to Failure("check_failed", "check_failed", "Failure reason")))
-        } else {
-            val phoneState = if (++stateCount % 3 == 0) DossierEntryState.FAILURE else DossierEntryState.PENDING
-            if (phoneState == DossierEntryState.FAILURE) stateCount = 2
-            DossierLimitedStatus(
-                phoneState,
-                DossierEntryState.PENDING,
-                DossierEntryState.PENDING,
-                mapOf(DossierQuestion.REPRESENTATIVE_NATIONALITY to DossierEntryState.PENDING, DossierQuestion.REPRESENTATIVE_CAPACITY to DossierEntryState.PENDING),
-                DossierEntryState.PENDING,
-                DossierEntryState.PENDING,
-                mapOf(DossierDocument.RESIDENTIAL_ADDRESS to DossierEntryState.PENDING),
-                dossierJwtPayload.dossierId,
-                DossierEntryState.PENDING,
-                "group",
-                phoneState,
-                mapOf("phone" to Failure("check_failed", "check_failed", "Phone failure reason"), "email" to Failure("check_failed", "check_failed", "Email failure reason")))
+            HttpResponse.notFound()
         }
+    }
+
+    @Post("/api/v1/dossier")
+    fun createDossier(@Body dossierInitiationData: DossierInitiationData): DossierJwtToken {
+        logger.debug("Bearer token request: $dossierInitiationData")
+        val dossierType = DossierType from dossierInitiationData.clientId
+
+        if (!state.containsKey(dossierInitiationData.openidAuthCode)) {
+            state[dossierInitiationData.openidAuthCode] =
+                DossierData(id = dossierInitiationData.openidAuthCode, type = dossierType)
+        }
+        val dossierJwtPayload = DossierJwtPayload(dossierInitiationData.openidAuthCode, dossierInitiationData.clientId, 1668507375000L, 1667902575000L, UUID.randomUUID().toString(), "snapswap-mock")
+        // create and return JWT token
+        val jwtToken = DossierJwtParser.createJwtToken(Json.encodeToString(dossierJwtPayload))
+        return DossierJwtToken(DossierAuthToken(token = jwtToken))
     }
 
     @Get("/api/v1/dossier/data")
     fun data(): String {
         logger.debug("DossierBearerToken Data")
         return ResponseData.DOSSIER_DATA
-    }
-
-    @Post("/api/v1/dossier")
-    fun createDossier(@Body content: DossierInitiationData): String {
-        logger.debug("Bearer token request: $content")
-        return if (DossierType from content.clientId == DossierType.DOSSIER_BASIC) {
-            ResponseData.BEARER_TOKEN_BASIC
-        } else {
-            ResponseData.BEARER_TOKEN_LIMITED
-        }
     }
 
     @Get("/api/v1/dossier/id_document/allowed")
@@ -87,16 +66,29 @@ class SnapSwapApi {
     }
 
     @Post("/api/v1/dossier/enterprise")
-    fun addEnterprise(content: EnterpriseData): String {
+    fun addEnterprise(@Header(AUTHORIZATION) jwtTokenString: String, content: EnterpriseData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/enterprise: $content")
-        return ResponseData.DOSSIER_STATUS_BASIC
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        endPointHitStatistics.enterpriseHitCount++
+        return if (state.containsKey(dossierJwtPayload.dossierId)) {
+            state[dossierJwtPayload.dossierId]?.enterprise = DossierCompanyInformation(content.companyName, content.registrationNumber, content.registrationCountry, content.registrationAddress, content.businessAddress, DossierEntryState.PENDING)
+            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+        } else {
+            HttpResponse.notFound()
+        }
     }
 
     @Post("/api/v1/dossier/phone")
-    fun addPhone(content: PhoneData): String {
+    fun addPhone(@Header(AUTHORIZATION) jwtTokenString: String, content: PhoneData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/phone: $content")
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         endPointHitStatistics.phoneEndpointHitCount++
-        return ResponseData.DOSSIER_STATUS_BASIC
+        return if (state.containsKey(dossierJwtPayload.dossierId)) {
+            state[dossierJwtPayload.dossierId]?.phone = DossierPhone(content.phone, DossierEntryState.PENDING)
+            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+        } else {
+            HttpResponse.notFound()
+        }
     }
 
     @Post("/api/v1/dossier/phone/confirmation")
@@ -111,10 +103,16 @@ class SnapSwapApi {
     }
 
     @Post("/api/v1/dossier/email")
-    fun addEmail(content: EmailData): String {
+    fun addEmail(@Header(AUTHORIZATION) jwtTokenString: String, content: EmailData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/email: $content")
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         endPointHitStatistics.emailEndpointHitCount++
-        return ResponseData.DOSSIER_STATUS_BASIC
+        return if (state.containsKey(dossierJwtPayload.dossierId)) {
+            state[dossierJwtPayload.dossierId]?.email = DossierEmail(content.email, DossierEntryState.PENDING)
+            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+        } else {
+            HttpResponse.notFound()
+        }
     }
     @Post("/api/v1/dossier/email/confirmation")
     fun confirmEmail(content: EmailConfirmationData): String {
@@ -128,19 +126,52 @@ class SnapSwapApi {
     }
 
     @Post("/api/v1/dossier/residential_address")
-    fun addResidentialAddress(content: ResidentialAddressData): String {
+    fun addResidentialAddress(@Header(AUTHORIZATION) jwtTokenString: String, content: ResidentialAddressData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/residential_address: $content")
-        return ResponseData.DOSSIER_STATUS_BASIC
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        endPointHitStatistics.residentialAddressHitCount++
+        return if (state.containsKey(dossierJwtPayload.dossierId)) {
+            state[dossierJwtPayload.dossierId]?.residentialAddress = DossierResidentialAddress(content.streetAddress, DossierEntryState.PENDING)
+            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+        } else {
+            HttpResponse.notFound()
+        }
     }
 
     @Post("/api/v1/dossier/questions")
-    fun addQuestions(@Body content: List<QuestionData>): String {
+    fun addQuestions(@Header(AUTHORIZATION) jwtTokenString: String, @Body content: List<QuestionData>): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/questions: $content")
-        return ResponseData.DOSSIER_STATUS_BASIC
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        endPointHitStatistics.questionsHitCount++
+        return if (state.containsKey(dossierJwtPayload.dossierId)) {
+            content.forEach {
+                state[dossierJwtPayload.dossierId]?.questions?.add(DossierQuestionAndAnswer(it.question, it.answer, DossierEntryState.PENDING))
+            }
+            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+        } else {
+            HttpResponse.notFound()
+        }
     }
+
+    @Get("/api/v1/dossier/list")
+    fun dossierList() : List<DossierData> = state.values.toList()
 
     @Get("/api/v1/stats")
     fun stat(): EndPointHitStatistics {
         return endPointHitStatistics
+    }
+
+    @Post("/api/v1/dossier/status")
+    fun updateStatus(statusUpdateData: StatusUpdateData): HttpStatus {
+        logger.debug("Status update request $statusUpdateData")
+        return if (state.containsKey(statusUpdateData.dossierId)) {
+            when(statusUpdateData.type) {
+                "phone" -> state[statusUpdateData.dossierId]?.phone?.state = statusUpdateData.status
+                "email" -> state[statusUpdateData.dossierId]?.email?.state = statusUpdateData.status
+            }
+            HttpStatus.OK
+        } else {
+            HttpStatus.NOT_FOUND
+        }
     }
 }

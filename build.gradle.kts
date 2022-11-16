@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen") version "1.6.21"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.6.3"
+    kotlin("plugin.serialization") version "1.6.21"
 }
 
 version = "0.1"
@@ -26,6 +27,7 @@ dependencies {
     implementation("io.micronaut:micronaut-validation")
     // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
     implementation("com.nimbusds:nimbus-jose-jwt:9.25.6")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 }
