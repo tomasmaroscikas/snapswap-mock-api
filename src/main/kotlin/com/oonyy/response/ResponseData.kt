@@ -8,7 +8,7 @@ class ResponseData {
             return """{
                   "email": "pending",
                   "enterprise": "pending",
-                  "consistency": "pending",
+                  "cResponseData.onsistency": "pending",
                   "questions": {
                     "representative_nationality": "success",
                     "representative_capacity": "success"

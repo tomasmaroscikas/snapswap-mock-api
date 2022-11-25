@@ -1,7 +1,12 @@
 package com.oonyy.model.internal
 
-import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.annotation.JsonProperty
+import kotlinx.serialization.Serializable
 
-enum class DossierDocument(@JsonValue val code: String) {
-    RESIDENTIAL_ADDRESS("residential_address")
-}
+@Serializable
+data class DossierDocument(@JsonProperty("document_type") val documentType: DossierDocumentType? = null,
+                           @JsonProperty("files") val files: List<DossierDocumentFile>? = null,
+                           @JsonProperty("color_scheme") val colorScheme: String? = null,
+                           val readability: String? = null,
+                           @JsonProperty("evidence_of") val evidenceOf: String? = null,
+                           var state: DossierEntryState)

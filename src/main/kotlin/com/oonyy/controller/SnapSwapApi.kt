@@ -1,16 +1,20 @@
 package com.oonyy.controller
 
+import com.oonyy.client.PortalClient
 import com.oonyy.jwt.DossierAuthToken
 import com.oonyy.jwt.DossierJwtParser
 import com.oonyy.jwt.DossierJwtPayload
 import com.oonyy.jwt.DossierJwtToken
 import com.oonyy.model.internal.*
+import com.oonyy.model.portal.SnapSwapEnvironment
 import com.oonyy.response.ResponseData
 import com.oonyy.model.request.*
 import com.oonyy.model.stat.EndPointHitStatistics
+import com.oonyy.service.PersistenceService
 import io.micronaut.http.HttpHeaders.AUTHORIZATION
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
+import io.micronaut.http.MediaType.MULTIPART_FORM_DATA
 import io.micronaut.http.annotation.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -19,20 +23,20 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 @Controller("snapswap/mock")
-class SnapSwapApi {
+class SnapSwapApi(private val portalClient: PortalClient, private val persistenceService: PersistenceService) {
 
     private val logger: Logger = LoggerFactory.getLogger(SnapSwapApi::class.java)
-    private var state: MutableMap<String, DossierData> = mutableMapOf()
-    private var endPointHitStatistics = EndPointHitStatistics(0, 0, 0, 0, 0)
-    var stateCount  = 0
+    private var state: MutableMap<DossierKey, DossierData> = mutableMapOf()
+    private var endPointHitStatistics = EndPointHitStatistics(0, 0, 0, 0, 0, 0)
 
     @Get("/api/v1/dossier")
     fun status(@Header(AUTHORIZATION) jwtTokenString: String): HttpResponse<DossierStatus> {
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierType = DossierType from dossierJwtPayload.clientId
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         logger.debug("Dossier status for $dossierType")
-        return if (state.containsKey(dossierJwtPayload.dossierId)) {
-            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+        return if (state.containsKey(dossierKey)) {
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
         }
@@ -42,10 +46,13 @@ class SnapSwapApi {
     fun createDossier(@Body dossierInitiationData: DossierInitiationData): DossierJwtToken {
         logger.debug("Bearer token request: $dossierInitiationData")
         val dossierType = DossierType from dossierInitiationData.clientId
-
-        if (!state.containsKey(dossierInitiationData.openidAuthCode)) {
-            state[dossierInitiationData.openidAuthCode] =
-                DossierData(id = dossierInitiationData.openidAuthCode, type = dossierType)
+        val dossierKey = DossierKey(dossierInitiationData.openidAuthCode, dossierInitiationData.clientId)
+        if (!state.containsKey(dossierKey)) {
+            // query Portal to get CustomerId
+            // TODO handle when portal is not available
+            var idToken = portalClient.getCustomerId(SnapSwapEnvironment.DEVELOPMENT, "authorization_code", dossierInitiationData.openidAuthCode)
+            state[dossierKey] =
+                DossierData(id = dossierInitiationData.openidAuthCode, type = dossierType, customerId = idToken.idToken.sub, idDocument = DossierIdDocument(1234567890, DossierEntryState.PENDING))
         }
         val dossierJwtPayload = DossierJwtPayload(dossierInitiationData.openidAuthCode, dossierInitiationData.clientId, 1668507375000L, 1667902575000L, UUID.randomUUID().toString(), "snapswap-mock")
         // create and return JWT token
@@ -54,9 +61,15 @@ class SnapSwapApi {
     }
 
     @Get("/api/v1/dossier/data")
-    fun data(): String {
+    fun data(@Header(AUTHORIZATION) jwtTokenString: String): HttpResponse<DossierData> {
         logger.debug("DossierBearerToken Data")
-        return ResponseData.DOSSIER_DATA
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
+        return if (state.containsKey(dossierKey)) {
+            HttpResponse.ok(state[dossierKey])
+        } else {
+            HttpResponse.notFound()
+        }
     }
 
     @Get("/api/v1/dossier/id_document/allowed")
@@ -69,10 +82,11 @@ class SnapSwapApi {
     fun addEnterprise(@Header(AUTHORIZATION) jwtTokenString: String, content: EnterpriseData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/enterprise: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.enterpriseHitCount++
-        return if (state.containsKey(dossierJwtPayload.dossierId)) {
-            state[dossierJwtPayload.dossierId]?.enterprise = DossierCompanyInformation(content.companyName, content.registrationNumber, content.registrationCountry, content.registrationAddress, content.businessAddress, DossierEntryState.PENDING)
-            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+        return if (state.containsKey(dossierKey)) {
+            state[dossierKey]?.enterprise = DossierCompanyInformation(content.companyName, content.registrationNumber, content.registrationCountry, content.registrationAddress, content.businessAddress, DossierEntryState.PENDING)
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
         }
@@ -82,10 +96,11 @@ class SnapSwapApi {
     fun addPhone(@Header(AUTHORIZATION) jwtTokenString: String, content: PhoneData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/phone: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.phoneEndpointHitCount++
-        return if (state.containsKey(dossierJwtPayload.dossierId)) {
-            state[dossierJwtPayload.dossierId]?.phone = DossierPhone(content.phone, DossierEntryState.PENDING)
-            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+        return if (state.containsKey(dossierKey)) {
+            state[dossierKey]?.phone = DossierPhone(content.phone, DossierEntryState.PENDING)
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
         }
@@ -106,10 +121,11 @@ class SnapSwapApi {
     fun addEmail(@Header(AUTHORIZATION) jwtTokenString: String, content: EmailData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/email: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.emailEndpointHitCount++
-        return if (state.containsKey(dossierJwtPayload.dossierId)) {
-            state[dossierJwtPayload.dossierId]?.email = DossierEmail(content.email, DossierEntryState.PENDING)
-            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+        return if (state.containsKey(dossierKey)) {
+            state[dossierKey]?.email = DossierEmail(content.email, DossierEntryState.PENDING)
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
         }
@@ -129,10 +145,15 @@ class SnapSwapApi {
     fun addResidentialAddress(@Header(AUTHORIZATION) jwtTokenString: String, content: ResidentialAddressData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/residential_address: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.residentialAddressHitCount++
-        return if (state.containsKey(dossierJwtPayload.dossierId)) {
-            state[dossierJwtPayload.dossierId]?.residentialAddress = DossierResidentialAddress(content.streetAddress, DossierEntryState.PENDING)
-            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+        return if (state.containsKey(dossierKey)) {
+            // add to dedicated entity
+            state[dossierKey]?.residentialAddress = DossierResidentialAddress(content.streetAddress, DossierEntryState.PENDING)
+            // add entry to document
+            state[dossierKey]?.documents?.add(DossierDocument(documentType = DossierDocumentType.RESIDENTIAL_ADDRESS, state = DossierEntryState.PENDING))
+            logger.warn("This shouldn't be here 1")
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
         }
@@ -142,12 +163,29 @@ class SnapSwapApi {
     fun addQuestions(@Header(AUTHORIZATION) jwtTokenString: String, @Body content: List<QuestionData>): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/questions: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.questionsHitCount++
-        return if (state.containsKey(dossierJwtPayload.dossierId)) {
+        return if (state.containsKey(dossierKey)) {
             content.forEach {
-                state[dossierJwtPayload.dossierId]?.questions?.add(DossierQuestionAndAnswer(it.question, it.answer, DossierEntryState.PENDING))
+                state[dossierKey]?.questions?.add(DossierQuestionAndAnswer(it.question, it.answer, DossierEntryState.PENDING))
             }
-            HttpResponse.ok(DossierStatus.of(state[dossierJwtPayload.dossierId]))
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
+        } else {
+            HttpResponse.notFound()
+        }
+    }
+
+    @Post(value = "/api/v1/dossier/documents/questions/{documentType}/{questionId}", consumes = [MULTIPART_FORM_DATA])
+    fun addDocument(@Header(AUTHORIZATION) jwtTokenString: String, @PathVariable documentType: String, @PathVariable questionId: String, @Body file: ByteArray): HttpResponse<DossierStatus> {
+        logger.debug("Received POST request to /api/v1/dossier/documents/questions/$documentType/$questionId")
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
+        endPointHitStatistics.documentsHitCount++
+        return if (state.containsKey(dossierKey)) {
+            // TODO not sure if we call this endpoint
+            state[dossierKey]?.documents?.add(DossierDocument(documentType = DossierDocumentType.RESIDENTIAL_ADDRESS, state = DossierEntryState.PENDING))
+            logger.warn("This shouldn't be here 2")
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
         }
@@ -162,16 +200,43 @@ class SnapSwapApi {
     }
 
     @Post("/api/v1/dossier/status")
-    fun updateStatus(statusUpdateData: StatusUpdateData): HttpStatus {
+    fun updateStatus(@Header(AUTHORIZATION) jwtTokenString: String, statusUpdateData: StatusUpdateData): HttpStatus {
         logger.debug("Status update request $statusUpdateData")
-        return if (state.containsKey(statusUpdateData.dossierId)) {
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
+        return if (state.containsKey(dossierKey)) {
             when(statusUpdateData.type) {
-                "phone" -> state[statusUpdateData.dossierId]?.phone?.state = statusUpdateData.status
-                "email" -> state[statusUpdateData.dossierId]?.email?.state = statusUpdateData.status
+                "phone" -> state[dossierKey]?.phone?.state = statusUpdateData.status
+                "email" -> state[dossierKey]?.email?.state = statusUpdateData.status
+                "residential_address" -> state[dossierKey]?.residentialAddress?.state = statusUpdateData.status
+                "enterprise" -> state[dossierKey]?.enterprise?.state = statusUpdateData.status
+                "consistency" -> state[dossierKey]?.consistency = statusUpdateData.status
+                "delivery" -> state[dossierKey]?.delivery = statusUpdateData.status
+                "id_document" -> state[dossierKey]?.idDocument?.state = statusUpdateData.status
+                "residential_address_document" -> state[dossierKey]?.documents?.filter { it.documentType == DossierDocumentType.RESIDENTIAL_ADDRESS }?.forEach { it.state = statusUpdateData.status }
+                "questions" -> state[dossierKey]?.questions?.forEach { it.state = statusUpdateData.status }
             }
             HttpStatus.OK
         } else {
             HttpStatus.NOT_FOUND
         }
+    }
+
+    @Get("/api/v1/dossier/state/reset")
+    fun resetState(): HttpStatus {
+        state = mutableMapOf()
+        return HttpStatus.OK
+    }
+
+    @Get("/api/v1/dossier/state/persist")
+    fun saveState(): HttpStatus {
+        persistenceService.writeState(state)
+        return HttpStatus.OK
+    }
+
+    @Get("/api/v1/dossier/state/restore")
+    fun restoreState(): HttpStatus {
+        state = persistenceService.readState()
+        return HttpStatus.OK
     }
 }

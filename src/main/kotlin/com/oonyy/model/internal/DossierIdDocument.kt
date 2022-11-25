@@ -1,3 +1,6 @@
 package com.oonyy.model.internal
 
-data class DossierIdDocument(var number: Number, var state: DossierEntryState = DossierEntryState.PENDING)
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class DossierIdDocument(var number: Int, var state: DossierEntryState = DossierEntryState.PENDING)
