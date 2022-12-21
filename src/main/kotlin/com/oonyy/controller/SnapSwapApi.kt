@@ -10,10 +10,12 @@ import com.oonyy.model.portal.SnapSwapEnvironment
 import com.oonyy.response.ResponseData
 import com.oonyy.model.request.*
 import com.oonyy.model.stat.EndPointHitStatistics
+import com.oonyy.openid.TokenRequest
 import com.oonyy.service.PersistenceService
 import io.micronaut.http.HttpHeaders.AUTHORIZATION
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
+import io.micronaut.http.MediaType
 import io.micronaut.http.MediaType.MULTIPART_FORM_DATA
 import io.micronaut.http.annotation.*
 import kotlinx.serialization.encodeToString
@@ -28,6 +30,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
     private val logger: Logger = LoggerFactory.getLogger(SnapSwapApi::class.java)
     private var state: MutableMap<DossierKey, DossierData> = mutableMapOf()
     private var endPointHitStatistics = EndPointHitStatistics()
+    private val tokens: MutableMap<String, String> = mutableMapOf()
 
     @Get("/api/v1/dossier")
     fun status(@Header(AUTHORIZATION) jwtTokenString: String): HttpResponse<DossierStatus> {
@@ -58,6 +61,31 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         // create and return JWT token
         val jwtToken = DossierJwtParser.createJwtToken(Json.encodeToString(dossierJwtPayload))
         return DossierJwtToken(DossierAuthToken(token = jwtToken))
+    }
+
+    @Post("/openid/token")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.TEXT_PLAIN)
+    fun getCustomerId(@Body content: TokenRequest): String? {
+        return if (tokens.containsKey(content.code)) {
+            tokens[content.code]
+        } else {
+            val customerId = createCustomerId(content.code)
+            tokens[content.code] = customerId;
+            endPointHitStatistics.customerCount++
+            customerId;
+        }
+    }
+
+    @Get("/openid/list")
+    fun listCustomerIds() = tokens
+
+    private fun createCustomerId(code: String): String {
+        return """
+            {
+                "id_token": "{\"aud\":\"snapswap-rkyc\",\"sub\":\"ORGANIZATION_${tokens.size}_22122101\",\"iss\":\"https://www.customweb.com\"}"
+            }
+        """.trimIndent()
     }
 
     @Get("/api/v1/dossier/data")

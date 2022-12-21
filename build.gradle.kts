@@ -54,13 +54,9 @@ tasks {
 }
 graalvmNative.toolchainDetection.set(false)
 micronaut {
-    runtime("netty")
-    testRuntime("junit5")
+    runtime("google_function")
     processing {
         incremental(true)
         annotations("com.oonyy.*")
     }
 }
-
-
-
