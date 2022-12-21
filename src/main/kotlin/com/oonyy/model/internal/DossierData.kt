@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DossierData(@JsonProperty("customer_id") var customerId: String? = null,
-                       var type: DossierType? = DossierType.DOSSIER_BASIC,
+                       val type: DossierType = DossierType.DOSSIER_BASIC,
                        var email: DossierEmail? = null,
                        var consistency: DossierEntryState = DossierEntryState.PENDING,
                        var delivery: DossierEntryState = DossierEntryState.PENDING,

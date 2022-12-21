@@ -1,7 +1,9 @@
 package com.oonyy.model.internal
 
 import com.oonyy.until.EnumFinder
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class DossierType(val code: String) {
 
     DOSSIER_LIMITED("customweb-limited"),

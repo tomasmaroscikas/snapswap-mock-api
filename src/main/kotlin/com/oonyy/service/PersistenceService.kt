@@ -13,12 +13,12 @@ const val SNAP_SWAP_STATE_FILE_NAME: String = "SnapSwapState.txt"
 @Bean
 class PersistenceService {
 
-    fun writeState(state: Map<DossierKey, DossierData>) {
+    fun writeState(state: MutableCollection<DossierData>) {
         File(SNAP_SWAP_STATE_FILE_NAME).writeText(Json.encodeToString(state))
     }
 
     fun readState(): MutableMap<DossierKey, DossierData> {
         val state = File(SNAP_SWAP_STATE_FILE_NAME).readText()
-        return Json.decodeFromString(state)
+        return Json.decodeFromString<List<DossierData>>(state).associate { DossierKey(it.id, it.type.code) to it  }.toMutableMap()
     }
 }

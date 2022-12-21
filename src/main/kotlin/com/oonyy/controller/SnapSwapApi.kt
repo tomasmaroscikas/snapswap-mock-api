@@ -27,7 +27,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
 
     private val logger: Logger = LoggerFactory.getLogger(SnapSwapApi::class.java)
     private var state: MutableMap<DossierKey, DossierData> = mutableMapOf()
-    private var endPointHitStatistics = EndPointHitStatistics(0, 0, 0, 0, 0, 0)
+    private var endPointHitStatistics = EndPointHitStatistics()
 
     @Get("/api/v1/dossier")
     fun status(@Header(AUTHORIZATION) jwtTokenString: String): HttpResponse<DossierStatus> {
@@ -45,12 +45,12 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
     @Post("/api/v1/dossier")
     fun createDossier(@Body dossierInitiationData: DossierInitiationData): DossierJwtToken {
         logger.debug("Bearer token request: $dossierInitiationData")
-        val dossierType = DossierType from dossierInitiationData.clientId
+        val dossierType = (DossierType from dossierInitiationData.clientId) ?: DossierType.DOSSIER_LIMITED
         val dossierKey = DossierKey(dossierInitiationData.openidAuthCode, dossierInitiationData.clientId)
         if (!state.containsKey(dossierKey)) {
             // query Portal to get CustomerId
             // TODO handle when portal is not available
-            var idToken = portalClient.getCustomerId(SnapSwapEnvironment.DEVELOPMENT, "authorization_code", dossierInitiationData.openidAuthCode)
+            val idToken = portalClient.getCustomerId(SnapSwapEnvironment.DEVELOPMENT, "authorization_code", dossierInitiationData.openidAuthCode)
             state[dossierKey] =
                 DossierData(id = dossierInitiationData.openidAuthCode, type = dossierType, customerId = idToken.idToken.sub, idDocument = DossierIdDocument(1234567890, DossierEntryState.PENDING))
         }
@@ -146,13 +146,27 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         logger.debug("Received POST request to /api/v1/dossier/residential_address: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
-        endPointHitStatistics.residentialAddressHitCount++
+        endPointHitStatistics.amlRequestCount++
         return if (state.containsKey(dossierKey)) {
             // add to dedicated entity
             state[dossierKey]?.residentialAddress = DossierResidentialAddress(content.streetAddress, DossierEntryState.PENDING)
             // add entry to document
             state[dossierKey]?.documents?.add(DossierDocument(documentType = DossierDocumentType.RESIDENTIAL_ADDRESS, state = DossierEntryState.PENDING))
             logger.warn("This shouldn't be here 1")
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
+        } else {
+            HttpResponse.notFound()
+        }
+    }
+
+    @Post("/api/v1/dossier/aml_check/person/questions/{questionId}")
+    fun triggerUboAml(@Header(AUTHORIZATION) jwtTokenString: String, @PathVariable questionId: String, @Body content: DossierAmlPerson): HttpResponse<DossierStatus> {
+        logger.debug("/api/v1/dossier/aml_check/person/questions/$questionId: $content")
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
+        endPointHitStatistics.amlRequestCount++
+        return if (state.containsKey(dossierKey)) {
+            // It's ok to do nothing with received data, at least for now
             HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
@@ -230,7 +244,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
 
     @Get("/api/v1/dossier/state/persist")
     fun saveState(): HttpStatus {
-        persistenceService.writeState(state)
+        persistenceService.writeState(state.values)
         return HttpStatus.OK
     }
 

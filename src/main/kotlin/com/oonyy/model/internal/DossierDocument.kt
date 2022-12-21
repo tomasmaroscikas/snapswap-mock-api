@@ -9,4 +9,16 @@ data class DossierDocument(@JsonProperty("document_type") val documentType: Doss
                            @JsonProperty("color_scheme") val colorScheme: String? = null,
                            val readability: String? = null,
                            @JsonProperty("evidence_of") val evidenceOf: String? = null,
-                           var state: DossierEntryState)
+                           var state: DossierEntryState) {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other?.javaClass != javaClass) return false
+
+        other as DossierDocument
+
+        if (documentType == other.documentType) return true
+
+        return false
+    }
+}
