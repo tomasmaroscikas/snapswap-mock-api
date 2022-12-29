@@ -22,6 +22,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.*
 
 @Controller("snapswap/mock")
@@ -54,6 +55,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
             // query Portal to get CustomerId
             // TODO handle when portal is not available
             val idToken = portalClient.getCustomerId(SnapSwapEnvironment.DEVELOPMENT, "authorization_code", dossierInitiationData.openidAuthCode)
+            logger.debug("ID token from Portal: $idToken")
             state[dossierKey] =
                 DossierData(id = dossierInitiationData.openidAuthCode, type = dossierType, customerId = idToken.idToken.sub, idDocument = DossierIdDocument(1234567890, DossierEntryState.PENDING))
         }
@@ -65,7 +67,6 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
 
     @Post("/openid/token")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.TEXT_PLAIN)
     fun getCustomerId(@Body content: TokenRequest): String? {
         return if (tokens.containsKey(content.code)) {
             tokens[content.code]
@@ -81,11 +82,10 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
     fun listCustomerIds() = tokens
 
     private fun createCustomerId(code: String): String {
+        val currentDate = LocalDate.now()
         return """
-            {
-                "id_token": "{\"aud\":\"snapswap-rkyc\",\"sub\":\"ORGANIZATION_${tokens.size}_22122101\",\"iss\":\"https://www.customweb.com\"}"
-            }
-        """.trimIndent()
+            {"id_token": "{\"aud\":\"snapswap-rkyc\",\"sub\":\"ORGANIZATION_${tokens.size}_${currentDate}\",\"iss\":\"https://www.customweb.com\"}"}
+        """.trim()
     }
 
     @Get("/api/v1/dossier/data")

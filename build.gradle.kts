@@ -54,7 +54,7 @@ tasks {
 }
 graalvmNative.toolchainDetection.set(false)
 micronaut {
-    runtime("google_function")
+    runtime("netty")
     processing {
         incremental(true)
         annotations("com.oonyy.*")

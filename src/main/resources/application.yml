@@ -3,9 +3,9 @@ micronaut:
     name: snapswapMockApi
   server:
     port: 8089
-#  ssl:
-#    enabled: true
-#    buildSelfSigned: true
+    ssl:
+      enabled: true
+      buildSelfSigned: true
 netty:
   default:
     allocator:
