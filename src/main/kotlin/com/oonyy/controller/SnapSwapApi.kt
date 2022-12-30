@@ -119,7 +119,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Post("/api/v1/dossier/tax")
+    @Post("/api/v1/dossier/tax_id")
     fun addTax(@Header(AUTHORIZATION) jwtTokenString: String, @Body content: DossierTaxData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/tax: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
