@@ -20,7 +20,7 @@ class DossierJwtParser {
         fun parse(jwtTokenString: String): DossierJwtPayload {
             val jwtParsed = SignedJWT.parse(removePrefix(jwtTokenString,"Bearer "))
             val payloadMap = jwtParsed.payload.toJSONObject()
-            logger.debug("Payload map $payloadMap")
+            logger.debug("Token payload map $payloadMap")
             return DossierJwtPayload(payloadMap["dossierId"] as String, payloadMap["clientId"] as String, payloadMap["exp"] as Long, payloadMap["iat"] as Long, payloadMap["sub"] as String, payloadMap["iss"] as String)
         }
 
