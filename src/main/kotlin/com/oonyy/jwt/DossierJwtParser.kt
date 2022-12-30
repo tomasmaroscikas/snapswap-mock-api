@@ -2,12 +2,7 @@ package com.oonyy.jwt
 
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.MACSigner
-import com.nimbusds.jose.crypto.RSASSASigner
-import com.nimbusds.jose.jwk.RSAKey
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.nimbusds.jwt.SignedJWT
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.security.SecureRandom
 
@@ -18,10 +13,17 @@ class DossierJwtParser {
         private val logger = LoggerFactory.getLogger(DossierJwtParser::class.java)
 
         fun parse(jwtTokenString: String): DossierJwtPayload {
-            val jwtParsed = SignedJWT.parse(removePrefix(jwtTokenString,"Bearer "))
+            val jwtParsed = SignedJWT.parse(removePrefix(jwtTokenString, "Bearer "))
             val payloadMap = jwtParsed.payload.toJSONObject()
             logger.debug("Token payload map $payloadMap")
-            return DossierJwtPayload(payloadMap["dossierId"] as String, payloadMap["clientId"] as String, payloadMap["exp"] as Long, payloadMap["iat"] as Long, payloadMap["sub"] as String, payloadMap["iss"] as String)
+            return DossierJwtPayload(
+                payloadMap["dossierId"] as String,
+                payloadMap["clientId"] as String,
+                payloadMap["exp"] as Long,
+                payloadMap["iat"] as Long,
+                payloadMap["sub"] as String,
+                payloadMap["iss"] as String
+            )
         }
 
         fun createJwtToken(dossierJwtPayload: String): String {

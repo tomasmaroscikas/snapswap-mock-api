@@ -8,7 +8,7 @@ import com.oonyy.model.portal.response.DossierCustomerIdToken
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class DossierCustomerIdTokenDeserializer: JsonDeserializer<DossierCustomerIdToken>() {
+class DossierCustomerIdTokenDeserializer : JsonDeserializer<DossierCustomerIdToken>() {
 
     private val logger: Logger = LoggerFactory.getLogger(DossierCustomerIdTokenDeserializer::class.java)
 

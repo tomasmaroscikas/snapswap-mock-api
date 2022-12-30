@@ -1,8 +1,10 @@
-package com.oonyy.model.request
+package com.oonyy.model.internal
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class DossierTaxData(
     @JsonProperty("country") val country: String,
-    @JsonProperty("tax_id") val value: String
+    @JsonProperty("value") val value: String
 )

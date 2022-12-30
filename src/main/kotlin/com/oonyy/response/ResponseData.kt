@@ -113,6 +113,7 @@ class ResponseData {
                     }
                 }"""
 
-        const val ALLOWED_DOCUMENTS = """[{"allowed":[{"back":false,"doc_type":"passport"},{"back":false,"doc_type":"driving_license"},{"back":true,"doc_type":"id_card"}],"issuing_country":"LTU"},{"allowed":[{"back":false,"doc_type":"passport"}],"issuing_country":"CYM"},{"allowed":[{"back":false,"doc_type":"passport"}],"issuing_country":"PNG"},{"allowed":[{"back":false,"doc_type":"passport"},{"back":true,"doc_type":"driving_license"},{"back":true,"doc_type":"id_card"}],"issuing_country":"GHA"}]"""
+        const val ALLOWED_DOCUMENTS =
+            """[{"allowed":[{"back":false,"doc_type":"passport"},{"back":false,"doc_type":"driving_license"},{"back":true,"doc_type":"id_card"}],"issuing_country":"LTU"},{"allowed":[{"back":false,"doc_type":"passport"}],"issuing_country":"CYM"},{"allowed":[{"back":false,"doc_type":"passport"}],"issuing_country":"PNG"},{"allowed":[{"back":false,"doc_type":"passport"},{"back":true,"doc_type":"driving_license"},{"back":true,"doc_type":"id_card"}],"issuing_country":"GHA"}]"""
     }
 }
