@@ -55,7 +55,6 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
             // query Portal to get CustomerId
             // TODO handle when portal is not available
             val idToken = portalClient.getCustomerId(SnapSwapEnvironment.DEVELOPMENT, "authorization_code", dossierInitiationData.openidAuthCode)
-            logger.debug("ID token from Portal: $idToken")
             state[dossierKey] =
                 DossierData(id = dossierInitiationData.openidAuthCode, type = dossierType, customerId = idToken.idToken.sub, idDocument = DossierIdDocument(1234567890, DossierEntryState.PENDING))
         }
@@ -107,7 +106,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
     }
 
     @Post("/api/v1/dossier/enterprise")
-    fun addEnterprise(@Header(AUTHORIZATION) jwtTokenString: String, content: EnterpriseData): HttpResponse<DossierStatus> {
+    fun addEnterprise(@Header(AUTHORIZATION) jwtTokenString: String, @Body content: EnterpriseData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/enterprise: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
