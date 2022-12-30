@@ -119,6 +119,20 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
+    @Post("/api/v1/dossier/tax")
+    fun addTax(@Header(AUTHORIZATION) jwtTokenString: String, @Body content: DossierTaxData): HttpResponse<DossierStatus> {
+        logger.debug("Received POST request to /api/v1/dossier/tax: $content")
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
+        endPointHitStatistics.taxCount++
+        return if (state.containsKey(dossierKey)) {
+            state[dossierKey]?.taxId = content
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
+        } else {
+            HttpResponse.notFound()
+        }
+    }
+
     @Post("/api/v1/dossier/phone")
     fun addPhone(@Header(AUTHORIZATION) jwtTokenString: String, content: PhoneData): HttpResponse<DossierStatus> {
         logger.debug("Received POST request to /api/v1/dossier/phone: $content")

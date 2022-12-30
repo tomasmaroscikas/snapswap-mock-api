@@ -1,6 +1,7 @@
 package com.oonyy.model.internal
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.oonyy.model.request.DossierTaxData
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -15,4 +16,5 @@ data class DossierData(@JsonProperty("customer_id") var customerId: String? = nu
                        @JsonProperty("id_document") var idDocument: DossierIdDocument? = null,
                        var documents: MutableSet<DossierDocument> = mutableSetOf(),
                        var id: String,
-                       var phone: DossierPhone? = null)
+                       var phone: DossierPhone? = null,
+                       @JsonProperty("tax_id") var taxId: DossierTaxData? = null)
