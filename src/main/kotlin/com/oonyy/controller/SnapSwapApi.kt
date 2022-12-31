@@ -277,6 +277,15 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
                         DossierEntryState.PENDING
                     )
                 )
+
+                if (it.question.contains("doc_number")) {
+                    state[dossierKey]?.documents?.add(
+                        DossierDocument(
+                            documentType = DossierDocumentType.QUESTIONS,
+                            state = DossierEntryState.PENDING
+                        )
+                    )
+                }
             }
             HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
@@ -333,6 +342,8 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
                 "delivery" -> state[dossierKey]?.delivery = statusUpdateData.status
                 "id_document" -> state[dossierKey]?.idDocument?.state = statusUpdateData.status
                 "residential_address_document" -> state[dossierKey]?.documents?.filter { it.documentType == DossierDocumentType.RESIDENTIAL_ADDRESS }
+                    ?.forEach { it.state = statusUpdateData.status }
+                "document_questions" -> state[dossierKey]?.documents?.filter { it.documentType == DossierDocumentType.QUESTIONS }
                     ?.forEach { it.state = statusUpdateData.status }
                 "questions" -> state[dossierKey]?.questions?.forEach { it.state = statusUpdateData.status }
             }
