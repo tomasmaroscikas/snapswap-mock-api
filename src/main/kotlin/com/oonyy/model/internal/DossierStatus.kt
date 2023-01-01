@@ -11,7 +11,7 @@ data class DossierStatus(
     val questions: Map<String, DossierEntryState>?,
     val residential_address: DossierEntryState?,
     val id_document: DossierEntryState?,
-    val documents: DocumentStatus?,
+    val documents: Map<String, String>,
     val id: String?,
     val delivery: DossierEntryState,
     val group: String,
@@ -28,10 +28,7 @@ data class DossierStatus(
                 dossierData?.questions?.associate { it.question to it.state },
                 dossierData?.residentialAddress?.state ?: DossierEntryState.PENDING,
                 dossierData?.idDocument?.state,
-                DocumentStatus(
-                    dossierData?.documents?.firstOrNull { it.documentType == DossierDocumentType.RESIDENTIAL_ADDRESS }?.state?.code
-                        ?: DossierEntryState.PENDING.code
-                ),
+                dossierData?.documents.associate { it.documentType.code to it.state.code },
                 dossierData?.id,
                 dossierData!!.delivery,
                 "group",

@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DossierDocument(
-    @JsonProperty("document_type") val documentType: DossierDocumentType? = null,
+    @JsonProperty("document_type") val documentType: DossierDocumentType,
     @JsonProperty("files") val files: List<DossierDocumentFile>? = null,
     @JsonProperty("color_scheme") val colorScheme: String? = null,
     val readability: String? = null,
