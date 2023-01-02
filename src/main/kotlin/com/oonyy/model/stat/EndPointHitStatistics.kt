@@ -9,5 +9,6 @@ data class EndPointHitStatistics(
     var documentsHitCount: Int = 0,
     var amlRequestCount: Int = 0,
     var customerCount: Int = 0,
-    var taxCount: Int = 0
+    var taxCount: Int = 0,
+    var delivery: Int = 0
 )

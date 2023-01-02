@@ -319,6 +319,12 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
+    @Post("/api/v1/dossier/delivery")
+    fun dossierDeliver(@Header(AUTHORIZATION) jwtTokenString: String, ): HttpStatus {
+        endPointHitStatistics.delivery++
+        return HttpStatus.OK
+    }
+
     @Get("/api/v1/dossier/list")
     fun dossierList(): List<DossierData> = state.values.toList()
 
