@@ -17,5 +17,6 @@ data class DossierData(
     var documents: MutableSet<DossierDocument> = mutableSetOf(),
     var id: String,
     var phone: DossierPhone? = null,
-    @JsonProperty("tax_id") var taxId: DossierTaxData? = null
+    @JsonProperty("tax_id") var taxId: DossierTaxData? = null,
+    @JsonProperty("finalize_url")var finalizeUrl: String? = null
 )

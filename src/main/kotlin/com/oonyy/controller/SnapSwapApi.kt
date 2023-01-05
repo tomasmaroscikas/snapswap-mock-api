@@ -11,6 +11,7 @@ import com.oonyy.model.request.*
 import com.oonyy.model.request.DossierTaxData
 import com.oonyy.model.stat.EndPointHitStatistics
 import com.oonyy.openid.TokenRequest
+import com.oonyy.response.RepresentativeIdDocumentProcess
 import com.oonyy.response.ResponseData
 import com.oonyy.service.PersistenceService
 import io.micronaut.http.HttpHeaders.AUTHORIZATION
@@ -319,9 +320,33 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
+    @Delete("/api/v1/dossier/id_document/jumio/latest")
+    fun cancelRepresentativeDocument(@Header(AUTHORIZATION) jwtTokenString: String): HttpResponse<Map<String, String>> {
+        logger.debug("Received DELETE request to /api/v1/dossier/id_document/jumio/latest")
+        endPointHitStatistics.cancelRepresentativeIdDocumentCount++
+        return HttpResponse.ok(mapOf("fake" to "structure"))
+    }
+
+    @Post("/api/v1/dossier/id_document/jumio/web4")
+    fun initRepresentativeIdDocumentProcess(@Header(AUTHORIZATION) jwtTokenString: String, data: Map<String, String>): HttpResponse<RepresentativeIdDocumentProcess> {
+        logger.debug("Received POST request to /api/v1/dossier/id_document/jumio/web4")
+        endPointHitStatistics.initRepresentativeIdDocumentVerificationCount++
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
+        return if (state.containsKey(dossierKey)) {
+            state[dossierKey]?.finalizeUrl = data["redirect_url"]
+            HttpResponse.ok(RepresentativeIdDocumentProcess("https://localhost:8443/snapswap/mock/api/v1/id_document/finalize", "jumioScanRefrenceFake", "-1"))
+        } else {
+            HttpResponse.notFound()
+        }
+    }
+
+    /*@Get("/api/v1/dossier/id_document/finalize")
+    fun finalizeRepresentativeIdDocumentProcess()*/
+
     @Post("/api/v1/dossier/delivery")
-    fun dossierDeliver(@Header(AUTHORIZATION) jwtTokenString: String, ): HttpStatus {
-        endPointHitStatistics.delivery++
+    fun dossierDeliver(@Header(AUTHORIZATION) jwtTokenString: String): HttpStatus {
+        endPointHitStatistics.deliveryCount++
         return HttpStatus.OK
     }
 
@@ -347,7 +372,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
                 "consistency" -> state[dossierKey]?.consistency = statusUpdateData.status
                 "delivery" -> state[dossierKey]?.delivery = statusUpdateData.status
                 "id_document" -> state[dossierKey]?.idDocument?.state = statusUpdateData.status
-                "residential_address_document" -> state[dossierKey]?.documents?.filter { it.documentType == DossierDocumentType.RESIDENTIAL_ADDRESS }
+                    "residential_address_document" -> state[dossierKey]?.documents?.filter { it.documentType == DossierDocumentType.RESIDENTIAL_ADDRESS }
                     ?.forEach { it.state = statusUpdateData.status }
                 "document_questions" -> state[dossierKey]?.documents?.filter { it.documentType == DossierDocumentType.QUESTIONS }
                     ?.forEach { it.state = statusUpdateData.status }
