@@ -18,5 +18,6 @@ data class DossierData(
     var id: String,
     var phone: DossierPhone? = null,
     @JsonProperty("tax_id") var taxId: DossierTaxData? = null,
-    @JsonProperty("finalize_url")var finalizeUrl: String? = null
+    @JsonProperty("finalize_url")var finalizeUrl: String? = null,
+    @JsonProperty("failures")var failures: Map<String, Failure> = mutableMapOf()
 )

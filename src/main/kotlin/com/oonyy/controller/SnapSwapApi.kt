@@ -352,6 +352,23 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         return HttpStatus.OK
     }
 
+    /**
+     * Helper to have possibility to add failures
+     */
+    @Post("$ENDPOINT_PREFIX/failure")
+    fun add(@Header(AUTHORIZATION) jwtTokenString: String, data: Map<String, Failure>): HttpStatus {
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/failure")
+        endPointHitStatistics.addFailureCount++
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
+        return if (state.containsKey(dossierKey)) {
+            state[dossierKey]?.failures = data
+            HttpStatus.OK
+        } else {
+            HttpStatus.NOT_FOUND
+        }
+    }
+
     @Get("$ENDPOINT_PREFIX/list")
     fun dossierList(): List<DossierData> = state.values.toList()
 

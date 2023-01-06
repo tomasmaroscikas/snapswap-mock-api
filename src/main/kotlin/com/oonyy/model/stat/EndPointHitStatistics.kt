@@ -12,5 +12,6 @@ data class EndPointHitStatistics(
     var taxCount: Int = 0,
     var deliveryCount: Int = 0,
     var cancelRepresentativeIdDocumentCount: Int = 0,
-    var initRepresentativeIdDocumentVerificationCount: Int = 0
+    var initRepresentativeIdDocumentVerificationCount: Int = 0,
+    var addFailureCount: Int = 0
 )
