@@ -1,6 +1,7 @@
 package com.oonyy.controller
 
 import com.oonyy.client.PortalClient
+import com.oonyy.controller.SnapSwapApi.Companion.API_PREFIX
 import com.oonyy.jwt.DossierAuthToken
 import com.oonyy.jwt.DossierJwtParser
 import com.oonyy.jwt.DossierJwtPayload
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
-@Controller("snapswap/mock")
+@Controller("$API_PREFIX")
 class SnapSwapApi(private val portalClient: PortalClient, private val persistenceService: PersistenceService) {
 
     private val logger: Logger = LoggerFactory.getLogger(SnapSwapApi::class.java)
@@ -35,7 +36,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
     private var endPointHitStatistics = EndPointHitStatistics()
     private val tokens: MutableMap<String, String> = mutableMapOf()
 
-    @Get("/api/v1/dossier")
+    @Get("$ENDPOINT_PREFIX")
     fun status(@Header(AUTHORIZATION) jwtTokenString: String): HttpResponse<DossierStatus> {
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierType = DossierType from dossierJwtPayload.clientId
@@ -48,7 +49,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Post("/api/v1/dossier")
+    @Post("$ENDPOINT_PREFIX")
     fun createDossier(@Body dossierInitiationData: DossierInitiationData): DossierJwtToken {
         logger.debug("Bearer token request: $dossierInitiationData")
         val dossierType = (DossierType from dossierInitiationData.clientId) ?: DossierType.DOSSIER_LIMITED
@@ -105,7 +106,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         """.trim()
     }
 
-    @Get("/api/v1/dossier/data")
+    @Get("$ENDPOINT_PREFIX/data")
     fun data(@Header(AUTHORIZATION) jwtTokenString: String): HttpResponse<DossierData> {
         logger.debug("DossierBearerToken Data")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
@@ -117,18 +118,18 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Get("/api/v1/dossier/id_document/allowed")
+    @Get("$ENDPOINT_PREFIX/id_document/allowed")
     fun allowedDocuments(): String {
-        logger.debug("Received GET request to /api/v1/dossier/id_document/allowed")
+        logger.debug("Received GET request to $ENDPOINT_PREFIX/id_document/allowed")
         return ResponseData.ALLOWED_DOCUMENTS
     }
 
-    @Post("/api/v1/dossier/enterprise")
+    @Post("$ENDPOINT_PREFIX/enterprise")
     fun addEnterprise(
         @Header(AUTHORIZATION) jwtTokenString: String,
         @Body content: EnterpriseData
     ): HttpResponse<DossierStatus> {
-        logger.debug("Received POST request to /api/v1/dossier/enterprise: $content")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/enterprise: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.enterpriseHitCount++
@@ -147,12 +148,12 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Post("/api/v1/dossier/tax_id")
+    @Post("$ENDPOINT_PREFIX/tax_id")
     fun addTax(
         @Header(AUTHORIZATION) jwtTokenString: String,
         @Body content: DossierTaxData
     ): HttpResponse<DossierStatus> {
-        logger.debug("Received POST request to /api/v1/dossier/tax: $content")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/tax: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.taxCount++
@@ -165,9 +166,9 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Post("/api/v1/dossier/phone")
+    @Post("$ENDPOINT_PREFIX/phone")
     fun addPhone(@Header(AUTHORIZATION) jwtTokenString: String, content: PhoneData): HttpResponse<DossierStatus> {
-        logger.debug("Received POST request to /api/v1/dossier/phone: $content")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/phone: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.phoneEndpointHitCount++
@@ -179,9 +180,9 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Post("/api/v1/dossier/phone/confirmation")
+    @Post("$ENDPOINT_PREFIX/phone/confirmation")
     fun confirmPhone(content: PhoneConfirmationData): String {
-        logger.debug("Received POST request to /api/v1/dossier/phone/confirmation: $content")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/phone/confirmation: $content")
         return """{
                     "type": "https://rkyc.snapswap.vc/api/errors/access-denied",
                     "title": "Access denied",
@@ -190,9 +191,9 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
                 }"""
     }
 
-    @Post("/api/v1/dossier/email")
+    @Post("$ENDPOINT_PREFIX/email")
     fun addEmail(@Header(AUTHORIZATION) jwtTokenString: String, content: EmailData): HttpResponse<DossierStatus> {
-        logger.debug("Received POST request to /api/v1/dossier/email: $content")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/email: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.emailEndpointHitCount++
@@ -204,9 +205,9 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Post("/api/v1/dossier/email/confirmation")
+    @Post("$ENDPOINT_PREFIX/email/confirmation")
     fun confirmEmail(content: EmailConfirmationData): String {
-        logger.debug("Received POST request to /api/v1/dossier/email/confirmation: $content")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/email/confirmation: $content")
         return """{
                     "type": "https://rkyc.snapswap.vc/api/errors/access-denied",
                     "title": "Access denied",
@@ -215,12 +216,12 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
                 }"""
     }
 
-    @Post("/api/v1/dossier/residential_address")
+    @Post("$ENDPOINT_PREFIX/residential_address")
     fun addResidentialAddress(
         @Header(AUTHORIZATION) jwtTokenString: String,
         content: ResidentialAddressData
     ): HttpResponse<DossierStatus> {
-        logger.debug("Received POST request to /api/v1/dossier/residential_address: $content")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/residential_address: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.amlRequestCount++
@@ -242,13 +243,13 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Post("/api/v1/dossier/aml_check/person/questions/{questionId}")
+    @Post("$ENDPOINT_PREFIX/aml_check/person/questions/{questionId}")
     fun triggerUboAml(
         @Header(AUTHORIZATION) jwtTokenString: String,
         @PathVariable questionId: String,
         @Body content: DossierAmlPerson
     ): HttpResponse<DossierStatus> {
-        logger.debug("/api/v1/dossier/aml_check/person/questions/$questionId: $content")
+        logger.debug("$ENDPOINT_PREFIX/aml_check/person/questions/$questionId: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.amlRequestCount++
@@ -260,12 +261,12 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Post("/api/v1/dossier/questions")
+    @Post("$ENDPOINT_PREFIX/questions")
     fun addQuestions(
         @Header(AUTHORIZATION) jwtTokenString: String,
         @Body content: List<QuestionData>
     ): HttpResponse<DossierStatus> {
-        logger.debug("Received POST request to /api/v1/dossier/questions: $content")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/questions: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.questionsHitCount++
@@ -294,14 +295,14 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Post(value = "/api/v1/dossier/documents/questions/{documentType}/{questionId}", consumes = [MULTIPART_FORM_DATA])
+    @Post(value = "$ENDPOINT_PREFIX/documents/questions/{documentType}/{questionId}", consumes = [MULTIPART_FORM_DATA])
     fun addDocument(
         @Header(AUTHORIZATION) jwtTokenString: String,
         @PathVariable documentType: String,
         @PathVariable questionId: String,
         @Body file: ByteArray
     ): HttpResponse<DossierStatus> {
-        logger.debug("Received POST request to /api/v1/dossier/documents/questions/$documentType/$questionId")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/documents/questions/$documentType/$questionId")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.documentsHitCount++
@@ -320,37 +321,38 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Delete("/api/v1/dossier/id_document/jumio/latest")
+    @Delete("$ENDPOINT_PREFIX/id_document/jumio/latest")
     fun cancelRepresentativeDocument(@Header(AUTHORIZATION) jwtTokenString: String): HttpResponse<Map<String, String>> {
-        logger.debug("Received DELETE request to /api/v1/dossier/id_document/jumio/latest")
+        logger.debug("Received DELETE request to $ENDPOINT_PREFIX/id_document/jumio/latest")
         endPointHitStatistics.cancelRepresentativeIdDocumentCount++
         return HttpResponse.ok(mapOf("fake" to "structure"))
     }
 
-    @Post("/api/v1/dossier/id_document/jumio/web4")
+    @Post("$ENDPOINT_PREFIX/id_document/jumio/web4")
     fun initRepresentativeIdDocumentProcess(@Header(AUTHORIZATION) jwtTokenString: String, data: Map<String, String>): HttpResponse<RepresentativeIdDocumentProcess> {
-        logger.debug("Received POST request to /api/v1/dossier/id_document/jumio/web4")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/id_document/jumio/web4")
         endPointHitStatistics.initRepresentativeIdDocumentVerificationCount++
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         return if (state.containsKey(dossierKey)) {
             state[dossierKey]?.finalizeUrl = data["redirect_url"]
-            HttpResponse.ok(RepresentativeIdDocumentProcess("https://localhost:8443/snapswap/mock/api/v1/id_document/finalize", "jumioScanRefrenceFake", "-1"))
+            HttpResponse.ok(RepresentativeIdDocumentProcess("https://localhost:8443/$ID_DOCUMENT_FINALIZE", "jumioScanRefrenceFake", "-1"))
         } else {
             HttpResponse.notFound()
         }
     }
 
-    /*@Get("/api/v1/dossier/id_document/finalize")
-    fun finalizeRepresentativeIdDocumentProcess()*/
+    @Get("$ID_DOCUMENT_FINALIZE")
+    @Produces(MediaType.TEXT_PLAIN)
+    fun finalizeRepresentativeIdDocumentProcess(): HttpResponse<String> = HttpResponse.ok("You can trigger finalize upload using Postman")
 
-    @Post("/api/v1/dossier/delivery")
+    @Post("$ENDPOINT_PREFIX/delivery")
     fun dossierDeliver(@Header(AUTHORIZATION) jwtTokenString: String): HttpStatus {
         endPointHitStatistics.deliveryCount++
         return HttpStatus.OK
     }
 
-    @Get("/api/v1/dossier/list")
+    @Get("$ENDPOINT_PREFIX/list")
     fun dossierList(): List<DossierData> = state.values.toList()
 
     @Get("/api/v1/stats")
@@ -358,7 +360,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         return endPointHitStatistics
     }
 
-    @Post("/api/v1/dossier/status")
+    @Post("$ENDPOINT_PREFIX/status")
     fun updateStatus(@Header(AUTHORIZATION) jwtTokenString: String, statusUpdateData: StatusUpdateData): HttpStatus {
         logger.debug("Status update request $statusUpdateData")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
@@ -384,21 +386,28 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Get("/api/v1/dossier/state/reset")
+    @Get("$ENDPOINT_PREFIX/state/reset")
     fun resetState(): HttpStatus {
         state = mutableMapOf()
         return HttpStatus.OK
     }
 
-    @Get("/api/v1/dossier/state/persist")
+    @Get("$ENDPOINT_PREFIX/state/persist")
     fun saveState(): HttpStatus {
         persistenceService.writeState(state.values)
         return HttpStatus.OK
     }
 
-    @Get("/api/v1/dossier/state/restore")
+    @Get("$ENDPOINT_PREFIX/state/restore")
     fun restoreState(): HttpStatus {
         state = persistenceService.readState()
         return HttpStatus.OK
+    }
+
+    companion object {
+        const val API_PREFIX = "snapswap/mock"
+        private const val API_VERSION = "v1"
+        private const val ENDPOINT_PREFIX = "/api/$API_VERSION/dossier"
+        private const val ID_DOCUMENT_FINALIZE = "$API_PREFIX$ENDPOINT_PREFIX/id_document/finalize"
     }
 }
