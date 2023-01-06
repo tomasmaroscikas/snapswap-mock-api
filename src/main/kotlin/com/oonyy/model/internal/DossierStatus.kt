@@ -33,10 +33,7 @@ data class DossierStatus(
                 dossierData!!.delivery,
                 "group",
                 dossierData?.phone?.state,
-                mapOf(
-                    "phone" to Failure("check_failed", "check_failed", "Phone failure reason"),
-                    "email" to Failure("check_failed", "check_failed", "Email failure reason")
-                )
+                dossierData.failures
             )
         }
     }
