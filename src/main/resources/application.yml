@@ -5,7 +5,11 @@ micronaut:
     port: 8089
     ssl:
       enabled: true
-      buildSelfSigned: true
+      key-store:
+        path: classpath:server.p12
+        password: wallee2023
+        type: PKCS12
+#      buildSelfSigned: true
 netty:
   default:
     allocator:

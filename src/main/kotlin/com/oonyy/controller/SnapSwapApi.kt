@@ -342,9 +342,12 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Get("$ID_DOCUMENT_FINALIZE")
+    @Get("/api/v1/dossier/id_document/finalize")
     @Produces(MediaType.TEXT_PLAIN)
-    fun finalizeRepresentativeIdDocumentProcess(): HttpResponse<String> = HttpResponse.ok("You can trigger finalize upload using Postman")
+    fun finalizeRepresentativeIdDocumentProcess(): HttpResponse<String> {
+        logger.debug("Received GET request to $ID_DOCUMENT_FINALIZE")
+        return HttpResponse.ok("You can trigger finalize upload using Postman")
+    }
 
     @Post("$ENDPOINT_PREFIX/delivery")
     fun dossierDeliver(@Header(AUTHORIZATION) jwtTokenString: String): HttpStatus {
