@@ -16,6 +16,7 @@ import com.oonyy.response.RepresentativeIdDocumentProcess
 import com.oonyy.response.ResponseData
 import com.oonyy.service.PersistenceService
 import io.micronaut.http.HttpHeaders.AUTHORIZATION
+import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.MediaType
@@ -172,12 +173,22 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.phoneEndpointHitCount++
+        if (content.phone == "+41782301021") {
+            return HttpResponse.badRequest()
+        }
         return if (state.containsKey(dossierKey)) {
             state[dossierKey]?.phone = DossierPhone(content.phone, DossierEntryState.PENDING)
             HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
         }
+    }
+
+    @Error(status = HttpStatus.BAD_REQUEST)
+    fun badRequest(request: HttpRequest<*>): HttpResponse<SnapSwapError> { //
+        val error = SnapSwapError("https://rkyc.snapswap.vc/api/errors/check-failed", "Check failed", 400, "Phone type 'invalid' not allowed")
+        return HttpResponse.badRequest<SnapSwapError>()
+            .body(error)
     }
 
     @Post("$ENDPOINT_PREFIX/phone/confirmation")
