@@ -1,7 +1,8 @@
 package com.oonyy.model.request
 
 import com.fasterxml.jackson.annotation.JsonProperty
-
+import kotlinx.serialization.Serializable;
+@Serializable
 data class ResidentialAddressData(
     @param:JsonProperty("country") val country: String,
     @param:JsonProperty("region") val region: String,

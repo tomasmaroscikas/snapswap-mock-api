@@ -235,23 +235,39 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         logger.debug("Received POST request to $ENDPOINT_PREFIX/residential_address: $content")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
-        endPointHitStatistics.amlRequestCount++
+        endPointHitStatistics.residentialAddressHitCount++
         return if (state.containsKey(dossierKey)) {
-            // add to dedicated entity
-            state[dossierKey]?.residentialAddress =
-                DossierResidentialAddress(content.streetAddress, DossierEntryState.PENDING)
-            // add entry to document
-            state[dossierKey]?.documents?.add(
-                DossierDocument(
-                    documentType = DossierDocumentType.RESIDENTIAL_ADDRESS,
-                    state = DossierEntryState.PENDING
-                )
-            )
+            handleResidentialAddress(state[dossierKey], content)
             logger.warn("This shouldn't be here 1")
             HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
         }
+    }
+
+    /* TODO move to service */
+    private fun handleResidentialAddress(dossierData: DossierData?, content: ResidentialAddressData) {
+        if (dossierData?.residentialAddress == null || !addressEquals(dossierData, content)) {
+            // add to dedicated entity
+            dossierData?.residentialAddress =
+                DossierResidentialAddress(content.country, content.region, content.city, content.postalCode, content.streetAddress, DossierEntryState.PENDING)
+
+            // add entry to document
+            dossierData?.documents?.add(
+                DossierDocument(
+                    documentType = DossierDocumentType.RESIDENTIAL_ADDRESS,
+                    state = DossierEntryState.PENDING
+                )
+            )
+        }
+    }
+
+    /* TODO move to service */
+    fun addressEquals(dossierData: DossierData?, content: ResidentialAddressData) : Boolean {
+        return content.country == dossierData?.residentialAddress?.country &&
+                content.city == dossierData?.residentialAddress?.city &&
+                content.postalCode == dossierData?.residentialAddress?.postalCode &&
+                content.streetAddress == dossierData?.residentialAddress?.streetAddress
     }
 
     @Post("$ENDPOINT_PREFIX/aml_check/person/questions/{questionId}")
