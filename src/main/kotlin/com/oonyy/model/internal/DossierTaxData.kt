@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DossierTaxData(
     @JsonProperty("country") val country: String,
-    @JsonProperty("value") val value: String
+    @JsonProperty("value") val value: String,
+    var state: DossierEntryState = DossierEntryState.PENDING
 )

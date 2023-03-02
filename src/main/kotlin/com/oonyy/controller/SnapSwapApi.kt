@@ -135,7 +135,18 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.enterpriseHitCount++
         return if (state.containsKey(dossierKey)) {
-            state[dossierKey]?.enterprise = DossierCompanyInformation(
+            handleEnterprise(state[dossierKey], content)
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
+        } else {
+            HttpResponse.notFound()
+        }
+    }
+
+    /* TODO move to service */
+    private fun handleEnterprise(dossierData: DossierData?, content: EnterpriseData) {
+        if (dossierData?.enterprise == null || !enterpriseEquals(dossierData, content)) {
+            // add to dedicated entity
+            dossierData?.enterprise = DossierCompanyInformation(
                 content.companyName,
                 content.registrationNumber,
                 content.country,
@@ -143,10 +154,16 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
                 content.businessAddress,
                 DossierEntryState.PENDING
             )
-            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
-        } else {
-            HttpResponse.notFound()
         }
+    }
+
+    /* TODO move to service - inspect default behavior of EnterpriseData equals */
+    private fun enterpriseEquals(dossierData: DossierData?, content: EnterpriseData) : Boolean {
+        return content.companyName == dossierData?.enterprise?.companyName &&
+                content.registrationNumber == dossierData?.enterprise?.registrationNumber &&
+                content.country == dossierData?.enterprise?.country &&
+                content.registrationAddress == dossierData?.enterprise?.registrationAddress &&
+                content.businessAddress == dossierData?.enterprise?.businessAddress
     }
 
     @Post("$ENDPOINT_PREFIX/tax_id")
@@ -160,11 +177,25 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         endPointHitStatistics.taxCount++
         return if (state.containsKey(dossierKey)) {
             // Here we have two classes with the same name, because of different property names in request and how SnapSwap responds later
-            state[dossierKey]?.taxId = com.oonyy.model.internal.DossierTaxData(content.country, content.value)
+            handleTax(state[dossierKey], content)
             HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
         }
+    }
+
+    /* TODO move to service */
+    private fun handleTax(dossierData: DossierData?, content: DossierTaxData) {
+        if (dossierData?.taxId == null || !taxEquals(dossierData, content)) {
+            // add to dedicated entity
+            dossierData?.taxId = com.oonyy.model.internal.DossierTaxData(content.country, content.value, DossierEntryState.PENDING)
+        }
+    }
+
+    /* TODO move to service - inspect default behavior of DossierTaxData equals */
+    private fun taxEquals(dossierData: DossierData?, content: DossierTaxData) : Boolean {
+        return content.country == dossierData?.taxId?.country &&
+                content.value == dossierData?.taxId?.value
     }
 
     @Post("$ENDPOINT_PREFIX/phone")
@@ -263,7 +294,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
     }
 
     /* TODO move to service */
-    fun addressEquals(dossierData: DossierData?, content: ResidentialAddressData) : Boolean {
+    private fun addressEquals(dossierData: DossierData?, content: ResidentialAddressData) : Boolean {
         return content.country == dossierData?.residentialAddress?.country &&
                 content.city == dossierData?.residentialAddress?.city &&
                 content.postalCode == dossierData?.residentialAddress?.postalCode &&
@@ -426,6 +457,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
                 "document_questions" -> state[dossierKey]?.documents?.filter { it.documentType == DossierDocumentType.QUESTIONS }
                     ?.forEach { it.state = statusUpdateData.status }
                 "questions" -> state[dossierKey]?.questions?.forEach { it.state = statusUpdateData.status }
+                "tax_id" -> state[dossierKey]?.taxId?.state = statusUpdateData.status
             }
             HttpStatus.OK
         } else {

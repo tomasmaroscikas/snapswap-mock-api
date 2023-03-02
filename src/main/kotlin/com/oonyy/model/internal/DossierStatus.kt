@@ -16,6 +16,7 @@ data class DossierStatus(
     val delivery: DossierEntryState,
     val group: String,
     val phone: DossierEntryState?,
+    val tax_id: DossierEntryState?,
     val failures: Map<String, Failure>?
 ) {
 
@@ -33,6 +34,7 @@ data class DossierStatus(
                 dossierData!!.delivery,
                 "group",
                 dossierData?.phone?.state,
+                dossierData?.taxId?.state,
                 dossierData.failures
             )
         }
