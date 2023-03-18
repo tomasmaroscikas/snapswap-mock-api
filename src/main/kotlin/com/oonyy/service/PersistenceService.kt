@@ -19,7 +19,7 @@ class PersistenceService {
 
     fun readState(): MutableMap<DossierKey, DossierData> {
         val state = File(SNAP_SWAP_STATE_FILE_NAME).readText()
-        return Json.decodeFromString<List<DossierData>>(state).associate { DossierKey(it.id, it.type.code) to it }
+        return Json.decodeFromString<List<DossierData>>(state).associateBy { DossierKey(it.id, it.type.code) }
             .toMutableMap()
     }
 }

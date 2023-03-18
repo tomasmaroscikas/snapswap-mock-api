@@ -2,6 +2,9 @@ package com.oonyy.controller
 
 import com.oonyy.client.PortalClient
 import com.oonyy.controller.SnapSwapApi.Companion.API_PREFIX
+import com.oonyy.crypto.AESECBCrypter
+import com.oonyy.faker.AmlGenerator
+import com.oonyy.json.DossierDataWithAmlSerializer
 import com.oonyy.jwt.DossierAuthToken
 import com.oonyy.jwt.DossierJwtParser
 import com.oonyy.jwt.DossierJwtPayload
@@ -12,8 +15,8 @@ import com.oonyy.model.request.*
 import com.oonyy.model.request.DossierTaxData
 import com.oonyy.model.stat.EndPointHitStatistics
 import com.oonyy.openid.TokenRequest
-import com.oonyy.response.RepresentativeIdDocumentProcess
-import com.oonyy.response.ResponseData
+import com.oonyy.model.internal.RepresentativeIdDocumentProcess
+import com.oonyy.properties.Properties
 import com.oonyy.service.PersistenceService
 import io.micronaut.http.HttpHeaders.AUTHORIZATION
 import io.micronaut.http.HttpRequest
@@ -53,7 +56,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
     @Post("$ENDPOINT_PREFIX")
     fun createDossier(@Body dossierInitiationData: DossierInitiationData): DossierJwtToken {
         logger.debug("Bearer token request: $dossierInitiationData")
-        val dossierType = (DossierType from dossierInitiationData.clientId) ?: DossierType.DOSSIER_LIMITED
+        val dossierType = (DossierType from dossierInitiationData.clientId) ?: DossierType.LIMITED
         val dossierKey = DossierKey(dossierInitiationData.openidAuthCode, dossierInitiationData.clientId)
         if (!state.containsKey(dossierKey)) {
             // query Portal to get CustomerId
@@ -122,7 +125,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
     @Get("$ENDPOINT_PREFIX/id_document/allowed")
     fun allowedDocuments(): String {
         logger.debug("Received GET request to $ENDPOINT_PREFIX/id_document/allowed")
-        return ResponseData.ALLOWED_DOCUMENTS
+        return Properties.ALLOWED_DOCUMENTS
     }
 
     @Post("$ENDPOINT_PREFIX/enterprise")
@@ -407,10 +410,51 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         return HttpResponse.ok("You can trigger finalize upload using Postman")
     }
 
+    /**
+     * Request Dossier delivery
+     */
     @Post("$ENDPOINT_PREFIX/delivery")
-    fun dossierDeliver(@Header(AUTHORIZATION) jwtTokenString: String): HttpStatus {
-        endPointHitStatistics.deliveryCount++
+    fun requestDossierDelivery(@Header(AUTHORIZATION) jwtTokenString: String): HttpStatus {
+        endPointHitStatistics.deliveryRequestCount++
         return HttpStatus.OK
+    }
+
+    /**
+     * Send Dossier to Portal
+     */
+    @Post("$ENDPOINT_PREFIX/delivery/send")
+    fun sendDossierDelivery(@Header(AUTHORIZATION) jwtTokenString: String, dossierDeliveryOptions: DossierDeliveryOptions): HttpStatus {
+        logger.debug("Received POST request to /delivery/send")
+        endPointHitStatistics.deliverySentCount++
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
+        return if (state.containsKey(dossierKey)) {
+
+            // TODO construct DossierDataWithAml
+            var dossierDataWithAml = DossierDataWithAml(state[dossierKey]!!, AmlGenerator.generateAml())
+
+            /*if (dossierDeliveryOptions.amlHits) {
+                // TODO: take dossier data and append with AML hits
+            }*/
+            // TODO enrypt DossierDataWithAml with AES/ECB/PKCS5Padding
+            val dossierDataWithAmlJsonString = DossierDataWithAmlSerializer.serialize(arrayOf(dossierDataWithAml))
+
+            logger.debug("======== START Dossier Delivery payload as JSON array =======")
+            logger.debug(dossierDataWithAmlJsonString)
+            logger.debug("======== END Dossier Delivery payload as JSON array =======")
+
+            logger.debug("START Encryption")
+            val encryptedDossier = AESECBCrypter.encrypt(com.oonyy.properties.Properties.ENCRYPTION_PASSWORD, dossierDataWithAmlJsonString)
+            logger.debug("END Encryption")
+
+            logger.debug("START Send delivery to Portal")
+            portalClient.sendDossierDelivery(com.oonyy.properties.Properties.DOSSIER_DELIVERY_AUTH_HEADER_VALUE, SnapSwapEnvironment.DEVELOPMENT, DossierType.LIMITED, encryptedDossier)
+            logger.debug("END Send delivery to Portal")
+
+            HttpStatus.OK
+        } else {
+            HttpStatus.NOT_FOUND
+        }
     }
 
     /**

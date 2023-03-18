@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class DossierType(val code: String) {
 
-    DOSSIER_LIMITED("customweb-limited"),
-    DOSSIER_BASIC("customweb-basic");
+    LIMITED("customweb-limited"),
+    BASIC("customweb-basic");
 
     companion object : EnumFinder<String, DossierType>(DossierType.values().associateBy { it.code })
 }

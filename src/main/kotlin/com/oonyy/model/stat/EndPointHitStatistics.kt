@@ -10,7 +10,8 @@ data class EndPointHitStatistics(
     var amlRequestCount: Int = 0,
     var customerCount: Int = 0,
     var taxCount: Int = 0,
-    var deliveryCount: Int = 0,
+    var deliveryRequestCount: Int = 0,
+    var deliverySentCount: Int = 0,
     var cancelRepresentativeIdDocumentCount: Int = 0,
     var initRepresentativeIdDocumentVerificationCount: Int = 0,
     var addFailureCount: Int = 0

@@ -1,4 +1,4 @@
-package com.oonyy.response
+package com.oonyy.model.internal
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

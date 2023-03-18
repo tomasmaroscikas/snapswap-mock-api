@@ -1,6 +1,6 @@
-package com.oonyy.response
+package com.oonyy.properties
 
-class ResponseData {
+class Properties {
 
     companion object {
         fun DOSSIER_STATUS_PHONE(phoneStatus: String): String {
@@ -115,5 +115,11 @@ class ResponseData {
 
         const val ALLOWED_DOCUMENTS =
             """[{"allowed":[{"back":false,"doc_type":"passport"},{"back":false,"doc_type":"driving_license"},{"back":true,"doc_type":"id_card"}],"issuing_country":"LTU"},{"allowed":[{"back":false,"doc_type":"passport"}],"issuing_country":"CYM"},{"allowed":[{"back":false,"doc_type":"passport"}],"issuing_country":"PNG"},{"allowed":[{"back":false,"doc_type":"passport"},{"back":true,"doc_type":"driving_license"},{"back":true,"doc_type":"id_card"}],"issuing_country":"GHA"}]"""
+
+        // 16 byte string used to encrypt Dossier delivery
+        val ENCRYPTION_PASSWORD = "0123456789ABCDEF".toByteArray(Charsets.US_ASCII)
+
+        // Encrypted password. Password is 0123456789ABCDEF
+        const val DOSSIER_DELIVERY_AUTH_HEADER_VALUE = "EncryptedAES C9fVhv+4bF3llhERTQbNu9qH4KfYWALG3Ov0aX76AXJvK2jmnQOCUHWryrSsbx+v1qwndo1RZKMsPTL1e5bVBeTPexDtuoZxpQMmYPpEQBvfy5ozo4mWhAHbQSt2rhjGh2S0ySUvr2EL4AgoqP5D5dgFWLJ5Htni4pIB4NLsUOeU3ZE1Ugo7NEzTg3GOJn1NCpFLHRusJFUHiy7PZZO1guvLziW64dnzqV+BptSNboYgNJlONEkubrNJFTyifAxg50jVoNGDKDxEwgPEzKETfw+uFAM0kR41U43rfxi4uL7cyVtjGZAz3KoBMc5HrD+jt1eBcpstpHngoUjxKOGmFQ=="
     }
 }

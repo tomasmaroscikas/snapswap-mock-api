@@ -28,7 +28,8 @@ dependencies {
     // https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
     implementation("com.nimbusds:nimbus-jose-jwt:9.25.6")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
-
+    // https://mvnrepository.com/artifact/com.github.javafaker/javafaker
+    implementation("com.github.javafaker:javafaker:1.0.2")
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 }
 
