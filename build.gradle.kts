@@ -30,6 +30,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     // https://mvnrepository.com/artifact/com.github.javafaker/javafaker
     implementation("com.github.javafaker:javafaker:1.0.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 }
 

@@ -1,10 +1,12 @@
 package com.oonyy.model.internal
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.Date
 
 data class DossierAmlCheckHit(
-    @get:JsonProperty("last_update") val lastUpdate: String,
+    @get:JsonProperty("last_update") val lastUpdate: ZonedDateTime,
     @get:JsonProperty("is_active_in_list") val isActiveInList: Boolean,
     val reason: String,
     @get:JsonProperty("given_name") val givenName: String,

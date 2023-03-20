@@ -6,10 +6,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DossierResidentialAddress(
-    @param:JsonProperty("country") var country: String,
-    @param:JsonProperty("region") var region: String,
-    @param:JsonProperty("city") var city: String,
-    @param:JsonProperty("postal_code") var postalCode: String,
-    @param:JsonProperty("street_address") var streetAddress: String,
+    @JsonProperty("country") var country: String,
+    @JsonProperty("region") var region: String,
+    @JsonProperty("city") var city: String,
+    @get:JsonProperty("postal_code") var postalCode: String,
+    @get:JsonProperty("street_address") var streetAddress: String,
     var state: DossierEntryState = DossierEntryState.PENDING
 )

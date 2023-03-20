@@ -3,7 +3,6 @@ package com.oonyy.model.internal
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 class DossierDataWithAml(dossierData: DossierData,
     @get:JsonProperty("aml_checks") var amlCheck: Array<DossierAmlCheck>? = null
 ) {
