@@ -9,7 +9,7 @@ data class DossierDocument(
     @JsonProperty("files") val files: List<DossierDocumentFile>? = null,
     @get:JsonProperty("color_scheme") val colorScheme: String? = null,
     val readability: String? = null,
-    @get:JsonProperty("evidence_of") val evidenceOf: String? = null,
+    @get:JsonProperty("evidence_of") val evidenceOf: DossierDocumentType,
     var state: DossierEntryState
 ) {
 

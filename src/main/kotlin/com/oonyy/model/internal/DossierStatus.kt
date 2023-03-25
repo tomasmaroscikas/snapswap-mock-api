@@ -29,7 +29,7 @@ data class DossierStatus(
                 dossierData?.questions?.associate { it.question to it.state },
                 dossierData?.residentialAddress?.state ?: DossierEntryState.PENDING,
                 dossierData?.idDocument?.state,
-                dossierData?.documents.associate { it.documentType.code to it.state.code },
+                dossierData?.documents.associate {  it.evidenceOf.code to it.state.code },
                 dossierData?.id,
                 dossierData!!.delivery,
                 "group",
