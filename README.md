@@ -12,12 +12,12 @@ In io.wallee.payment.facilitator.snapswap project
 
 In SnapSwap mock project
 - Start application
-```shell ./gradlew run```
+```./gradlew run```
 
 ## How to use?
 
 - Do PayFac onboarding as usual
-- Use [Postman Collection](PayFac.SnapSwap.RKYC.API_with_mocking_endpoints.postman_collection.json) to simulate responses from SnapSwap
+- Use [Postman Collection](doc/PayFac.SnapSwap.RKYC.API_with_mocking_endpoints.postman_collection.json) to simulate responses from SnapSwap
 - Use [this link](https://localhost:8443/snapswap/mock/api/v1/dossier/list) to inspect SnapSwap state
 
 ## Technical details
