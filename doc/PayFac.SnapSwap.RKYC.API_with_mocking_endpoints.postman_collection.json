@@ -1,0 +1,1252 @@
+{
+	"info": {
+		"_postman_id": "e2a9598a-806a-4d02-9c15-677d12800dab",
+		"name": "SnapSwap RKYC API with mocking endpoints",
+		"description": "This collection contains dedicated endpoints for the customweb onboarding process.\n\nCollection is enhanced with additional endpoints that are supported by [https://gitlab.com/tomas.maroscikas1/snapswap-mock-api](https://gitlab.com/tomas.maroscikas1/snapswap-mock-api)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5376293"
+	},
+	"item": [
+		{
+			"name": "1.1. Create new dossier / get access to the existing one (using CustomerID)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var authResponse = JSON.parse(responseBody);",
+							"var scheme = authResponse.auth.scheme",
+							"var token = authResponse.auth.token",
+							"postman.setEnvironmentVariable(\"jwt\", scheme + \" \" + token)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"client_id\": \"{{client_id}}\",\n  \"customer_id\":\"{{customer_id}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "1.2. Create new dossier / get access to the existing one (using OpenID)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var authResponse = JSON.parse(responseBody);",
+							"var scheme = authResponse.auth.scheme",
+							"var token = authResponse.auth.token",
+							"postman.setEnvironmentVariable(\"jwt\", scheme + \" \" + token)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"openid_auth_code\":\"1__1cba8d04-f685-4857-b1c9-d325d65db145\",\"client_id\":\"customweb-basic\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Add phone",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"phone\":\"38001112233\",\n  \"verify\": true\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/phone",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"phone"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Add email",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiJ9.eyJkb3NzaWVySWQiOiIxMjM0NTY3ODkiLCJjbGllbnRJZCI6ImN1c3RvbXdlYi1iYXNpYyIsImV4cCI6MTY2ODUwNzM3NTAwMCwiaWF0IjoxNjY3OTAyNTc1MDAwLCJzdWIiOiJkM2YxM2M2MS01ODU1LTQ4MzUtYTM5Ny1jNWYwMWEzYzc4MzkiLCJpc3MiOiJzbmFwc3dhcC1tb2NrIn0.7uYEmEh8mC4NHW843zVHvQvxOlxwzHp9uUtIw3nUCo8",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"my@email.eu\",\n\t\"verify\": true\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/email",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"email"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Confirm phone",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"phone\":\"38001112233\",\n  \"code\":\"102448\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/phone/confirmation",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"phone",
+						"confirmation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. Confirm email",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"my@email.eu\",\n\t\"code\":\"572-218\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/email/confirmation",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"email",
+						"confirmation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Enterprise",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"company_name\": \"SnapSwap\",\n\"registration_number\": \"B200548\",\n\"country\": \"LUX\",\n\"registration_address\": \"59 Boulevard Royal, LUX 2449 Luxembourg\",\n\"business_address\": \"9 Rue du Laboratoire, LUX 1911 Luxembourg\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/enterprise",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"enterprise"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7.1.1. Init verification for SDK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/id_document/sdk",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"id_document",
+						"sdk"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7.1.2. Init verification for the web SDK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"redirect_url\": \"https://dev-rkyc.snapswap.eu\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/id_document/jumio/web4",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"id_document",
+						"jumio",
+						"web4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7.1.3. Cancel verification",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/id_document/jumio/latest",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"id_document",
+						"jumio",
+						"latest"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7.2.1. ID document manual upload endpoint",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "front",
+							"type": "file",
+							"src": "/home/mitya/Desktop/my_international_passport.jpg"
+						},
+						{
+							"key": "back",
+							"type": "file",
+							"src": []
+						},
+						{
+							"key": "face",
+							"type": "file",
+							"src": "/home/mitya/Desktop/my_selfie.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/id_document/id_card/ESP",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"id_document",
+						"id_card",
+						"ESP"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8. Residential address",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"country\": \"LUX\",\n    \"region\": \"Luxembourg\",\n    \"city\": \"Luxembourg\",\n    \"postal_code\": \"2449\",\n    \"street_address\": \"59 Boulevard Royal\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/residential_address",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"residential_address"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "9. Questions",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiJ9.eyJkb3NzaWVySWQiOiIxMjM0NTY3ODkiLCJjbGllbnRJZCI6ImN1c3RvbXdlYi1iYXNpYyIsImV4cCI6MTY2ODUwNzM3NTAwMCwiaWF0IjoxNjY3OTAyNTc1MDAwLCJzdWIiOiJkM2YxM2M2MS01ODU1LTQ4MzUtYTM5Ny1jNWYwMWEzYzc4MzkiLCJpc3MiOiJzbmFwc3dhcC1tb2NrIn0.7uYEmEh8mC4NHW843zVHvQvxOlxwzHp9uUtIw3nUCo8"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n\t{\"question\": \"question1\", \"answer\": \"answer1\"},\n\t{\"question\": \"question2\", \"answer\": \"answer2\"}\n]"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/questions",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"questions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10.1 Evidence document",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"contentType": "",
+							"type": "file",
+							"src": "/home/mitya/Desktop/proof of residence.pdf"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/documents/residential_address/utility_bill",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"documents",
+						"residential_address",
+						"utility_bill"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Trigger AML check",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"nationality\":\"CHE\",\"birthdate\":\"1954-12-07\",\"family_name\":\"Grosmann\",\"given_name\":\"Ulrich\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/aml_check/person/questions/{{questionId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"aml_check",
+						"person",
+						"questions",
+						"{{questionId}}"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10.2 Evidence document for question",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"contentType": "",
+							"type": "file",
+							"src": "/home/mitya/Desktop/proof of residence.pdf"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/documents/questions/utility_bill/question1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"documents",
+						"questions",
+						"utility_bill",
+						"question1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "11. Dossier state",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiJ9.eyJkb3NzaWVySWQiOiIxMjM0NTY3ODkiLCJjbGllbnRJZCI6ImN1c3RvbXdlYi1iYXNpYyIsImV4cCI6MTY2ODUwNzM3NTAwMCwiaWF0IjoxNjY3OTAyNTc1MDAwLCJzdWIiOiI1YzM4NDI5NC00ZjIzLTRkOWEtYmJjOS1hYTU2MjBjMGQyOGMiLCJpc3MiOiJzbmFwc3dhcC1tb2NrIn0.lFsoPrzbpDTDI75LG6OFcl9MS4x-e7ZZTFrTs7lAmZQ"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "11. Dossier state",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": ""
+							}
+						],
+						"url": {
+							"raw": "https://localhost:8443/snapswap/mock/api/v1/dossier",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"snapswap",
+								"mock",
+								"api",
+								"v1",
+								"dossier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.14.0 (Ubuntu)"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 08 Nov 2022 10:25:26 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "251"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Strict-Transport-Security",
+							"value": "max-age=31536000"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"key": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Access-Control-Allow-Methods",
+							"value": "OPTIONS, GET, PUT, DELETE, POST, HEAD"
+						},
+						{
+							"key": "Access-Control-Allow-Headers",
+							"value": "Content-Range, Keep-Alive, Origin, WWW-Authenticate, Accept, Cache-Control, Content-Type, X-Accel-Buffering, If-None-Match, Authorization, User-Agent, X-Requested-With, Range, X-Range"
+						},
+						{
+							"key": "Access-Control-Expose-Headers",
+							"value": "Content-Range, Content-Type"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding, Authorization"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"tax_id\": \"pending\",\n    \"consistency\": \"success\",\n    \"documents\": {\n        \"questions\": \"pending\"\n    },\n    \"id\": \"60a50b28-5f4e-11ed-a17f-6bc86b422fba\",\n    \"delivery\": \"pending\",\n    \"group\": {\n        \"dossiers\": [\n            \"60a50b28-5f4e-11ed-a17f-6bc86b422fba\"\n        ],\n        \"id\": \"60a50b28-5f4e-11ed-a17f-6bc86b422fba\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "12. Dossier data",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/data",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"data"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "12. Dossier data",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": ""
+							}
+						],
+						"url": {
+							"raw": "https://localhost:8443/snapswap/mock/api/v1/dossier/data",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"snapswap",
+								"mock",
+								"api",
+								"v1",
+								"dossier",
+								"data"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.14.0 (Ubuntu)"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 08 Nov 2022 15:12:25 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "262"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Strict-Transport-Security",
+							"value": "max-age=31536000"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"key": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Access-Control-Allow-Methods",
+							"value": "OPTIONS, GET, PUT, DELETE, POST, HEAD"
+						},
+						{
+							"key": "Access-Control-Allow-Headers",
+							"value": "Content-Range, Keep-Alive, Origin, WWW-Authenticate, Accept, Cache-Control, Content-Type, X-Accel-Buffering, If-None-Match, Authorization, User-Agent, X-Requested-With, Range, X-Range"
+						},
+						{
+							"key": "Access-Control-Expose-Headers",
+							"value": "Content-Range, Content-Type"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding, Authorization"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"customer_id\": \"ORGANIZATION_2_46695204\",\n    \"invited\": [],\n    \"started_at\": \"2022-11-08T10:16:15.191Z\",\n    \"documents\": [],\n    \"id\": \"60a50b28-5f4e-11ed-a17f-6bc86b422fba\",\n    \"group\": {\n        \"dossiers\": {\n            \"60a50b28-5f4e-11ed-a17f-6bc86b422fba\": {}\n        },\n        \"id\": \"60a50b28-5f4e-11ed-a17f-6bc86b422fba\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "13. Request Delivery",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/delivery",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"delivery"
+					]
+				},
+				"description": "Endpoint to ask for Dossier delivery. Delivery in essence is Dossier data with AML checks. In the Portal we call this endpoint when consistency flag in the Dossier status is true. We issue this twice, one for LIMITED dossier and one for BASIC dossier.\n\n**References**\n\nCheck the following classes:\n\n- SnapSwapJobType#DELIVER_DOSSIER\n- SnapSwapDossierDeliveryService"
+			},
+			"response": []
+		},
+		{
+			"name": "14. Tax ID",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"tax_id\": \"12345678\",\n\t\"country\": \"LUX\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/tax_id",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"tax_id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "15. List of allowed ID documents",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{jwt}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/id_document/allowed",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"id_document",
+						"allowed"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "15. List of allowed ID documents",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": ""
+							}
+						],
+						"url": {
+							"raw": "https://localhost:8443/snapswap/mock/api/v1/dossier/id_document/allowed",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"snapswap",
+								"mock",
+								"api",
+								"v1",
+								"dossier",
+								"id_document",
+								"allowed"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.14.0 (Ubuntu)"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 08 Nov 2022 10:19:59 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "20624"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Strict-Transport-Security",
+							"value": "max-age=31536000"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"key": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Access-Control-Allow-Methods",
+							"value": "OPTIONS, GET, PUT, DELETE, POST, HEAD"
+						},
+						{
+							"key": "Access-Control-Allow-Headers",
+							"value": "Content-Range, Keep-Alive, Origin, WWW-Authenticate, Accept, Cache-Control, Content-Type, X-Accel-Buffering, If-None-Match, Authorization, User-Agent, X-Requested-With, Range, X-Range"
+						},
+						{
+							"key": "Access-Control-Expose-Headers",
+							"value": "Content-Range, Content-Type"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding, Authorization"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"LTU\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"CYM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"PNG\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"GHA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"CUB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"VUT\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"YEM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            }\n        ],\n        \"issuing_country\": \"ISL\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"RUS\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"TTO\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"LKA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"GIN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"JAM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"IRN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"CRI\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"TON\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"CZE\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"MYS\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"GGY\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"ROU\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"COM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"NGA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"SGP\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"FSM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"RWA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"TKM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"COD\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"ETH\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"LBR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"SLE\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"LSO\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MHL\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MOZ\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"ATG\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"ZAF\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"BFA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"ARM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"GNB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"BMU\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"TWN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"GBR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            }\n        ],\n        \"issuing_country\": \"BRN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"ITA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"LCA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"KGZ\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"NAM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"BWA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"DOM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MDG\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"PSE\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"HTI\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"TJK\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"GEO\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"TCA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"SRB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"HKG\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"LBN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"TZA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"BTN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"LIE\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"CHL\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"PAN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"MKD\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"BDI\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"DNK\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"DZA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"ECU\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"CHN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"SSD\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"ARE\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"GUY\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"GIB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"LUX\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"KEN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            }\n        ],\n        \"issuing_country\": \"IMN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MAR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"GRC\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"IDN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MRT\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"ZMB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"NER\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"PRT\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"FJI\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"KAZ\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"VEN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"CHE\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"VCT\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"GNQ\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"BIH\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"BEN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"SYR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            }\n        ],\n        \"issuing_country\": \"BLR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MAC\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"VNM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"PER\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            }\n        ],\n        \"issuing_country\": \"SAU\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"BHR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"TGO\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"MNE\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"THA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"HND\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"TUN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"JOR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"SWE\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"ALB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"SWZ\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"EGY\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"KOR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"AUT\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"GMB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"EST\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"DEU\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"CIV\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"TUR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"STP\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"CAN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"COL\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"ARG\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"DJI\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MSR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MUS\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"USA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"LAO\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"NLD\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"SYC\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"FRA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"ZWE\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"TCD\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MWI\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"UZB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"BRB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"KNA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"PAK\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"SVN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"NPL\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"BLZ\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"DMA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"GAB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"LVA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"SDN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"SLV\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"ESP\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"BGR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"AUS\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"OMN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"HRV\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            }\n        ],\n        \"issuing_country\": \"QAT\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"PRY\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"CPV\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            }\n        ],\n        \"issuing_country\": \"ISR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"CYP\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"URY\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"PLW\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"AIA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"SUR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"UKR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"GTM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"HUN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"GRD\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"BGD\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"BRA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"BHS\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            }\n        ],\n        \"issuing_country\": \"KWT\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"SEN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"SMR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"JPN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"AZE\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"SVK\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"MLT\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MLI\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"IRL\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"PHL\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"AGO\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"NIC\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"LBY\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"NOR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"POL\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MMR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"UGA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"FIN\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"JEY\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"TLS\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MCO\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"IRQ\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"BOL\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"MDA\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"MEX\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"MDV\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"CMR\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"AND\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"VGB\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            }\n        ],\n        \"issuing_country\": \"NZL\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"IND\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"MNG\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            }\n        ],\n        \"issuing_country\": \"KHM\"\n    },\n    {\n        \"allowed\": [\n            {\n                \"back\": false,\n                \"doc_type\": \"passport\"\n            },\n            {\n                \"back\": false,\n                \"doc_type\": \"driving_license\"\n            },\n            {\n                \"back\": true,\n                \"doc_type\": \"id_card\"\n            }\n        ],\n        \"issuing_country\": \"BEL\"\n    }\n]"
+				}
+			]
+		},
+		{
+			"name": "Deliver Dossier",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"amlHits\" : true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/delivery/send",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"delivery",
+						"send"
+					]
+				},
+				"description": "**This is Mock specific endpoint.**\n\nDeliver Dossier to Portal endpoint. You must submit LIMITED and BASIC as a separate requests. You can differentiate between LIMITED and BASIC using 1.2. endpoint.\n\n**Reference**\n\nCheck the following classes:\n\n- SnapSwapDossierDeliveryEndpointController"
+			},
+			"response": []
+		},
+		{
+			"name": "Update status",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"dossierId\": \"1__4eeec449-4d00-4807-aed3-08656c4cfc6a\",\n    \"type\": \"consistency\",\n    \"status\": \"success\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/status",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"status"
+					]
+				},
+				"description": "**This is Mock specific endpoint.**\n\nUse this endpoint to change satuses of various entries of Dossier. Change \"type\" and \"status\" and do not touch \"dossierId\". Differentiate between LIMITED and BASIC by using 1.2. endpoint.\n\nThe following \"type\" is supported:\n\n- phone - relevant for LIMITED\n- email - relevant for LIMITED\n- residential_address - relevant for LIMITED\n- enterprise - relevant for LIMITED\n- consistency - relevant for LIMITED and BASIC\n- delivery - relevant for LIMITED and BASIC\n- id_document - relevant for LIMITED\n- residential_address_document - relevant for LIMITED\n- document_questions - relevant for BASIC\n- questions - relevant for BASIC. Might be for LIMITED, but not sure\n- tax_id - relevant for BASIC\n    \n\nFor \"status\" you can use any option which is defined in RKYC specification, but in the Portal we care about two:\n\n- success\n- failure\n    \n\n**Reference**\n\nCheck the following classes:\n\n- SnapSwapDossierDeliveryEndpointController"
+			},
+			"response": []
+		},
+		{
+			"name": "AddFailure",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"phone\": {\n    \"code\": \"check_failed\",\n    \"sub_code\": \"denied_fraud\",\n    \"reason\": \"Listen now, your phone is highjacked and you are not aware of that. Send your phone to us.\"\n  },\n  \"id_document\": {\n    \"code\": \"id_type_not_accepted\",\n    \"sub_code\": \"denied_unsupported_id_type\",\n    \"reason\": \"We do not accept this type of ID documents\"\n  },\n  \"email\": {\n    \"code\": \"check_failed\",\n    \"sub_code\": \"family_name_not_found\",\n    \"reason\": \"Your email is not beautiful and we only communicate with beautiful things.\"\n  },\n  \"residential_address\": {\n    \"code\": \"check_failed\",\n    \"sub_code\": \"postal_code_mismatched\",\n    \"reason\": \"com.snapswap.rkyc.api.domain.exceptions.CheckFailed: address similarity is too low.\"\n  },\n  \"delivery\": {\n\t\t\t\"code\": \"check_failed\",\n            \"sub_code\": \"\",\n\t\t\t\"reason\": \"The same entity is already registered\\nSingleInsertAction [insert into \\\"tasks\\\" (\\\"id\\\",\\\"dossier_id\\\",\\\"processor\\\",\\\"created_at\\\",\\\"completed_at\\\",\\\"executions_counter\\\",\\\"failure_code\\\",\\\"failure_subcode\\\",\\\"failure_reason\\\",\\\"inputs\\\")  values (?,?,?,?,?,?,?,?,?,?)]\\n\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/failure",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"failure"
+					]
+				},
+				"description": "**This is Mock specific endpoint.**\n\nAllows to add \"failure\" entry to Dossier. If some of the Dossier entries have status \"failure\" then there is a separate entry \"failure\" which provides more details about the failure. Check the body for examples.\n\nWe had [https://wallee.atlassian.net/browse/WAL-91391](https://wallee.atlassian.net/browse/WAL-91391) issue where SnapSwap responded with \"failure\" entry for delivery and we didn't support that and case was stuck."
+			},
+			"response": []
+		},
+		{
+			"name": "Save state",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/state/persist",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"state",
+						"persist"
+					]
+				},
+				"description": "**This is Mock specific endpoint.**\n\nNormally you loose whole state when you stop Mock application. This endpoint allows to save state to a file. Then when you start the app again you can use \"Restore state\" endpoint and load the state from a file."
+			},
+			"response": []
+		},
+		{
+			"name": "Restore state",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/state/restore",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"state",
+						"restore"
+					]
+				},
+				"description": "**This is Mock specific endpoint.**\n\nYou can restore app state from the file."
+			},
+			"response": []
+		},
+		{
+			"name": "Reset state",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/v1/dossier/state/reset",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"dossier",
+						"state",
+						"reset"
+					]
+				},
+				"description": "**This is Mock specific endpoint.**\n\nDeletes current state as if you would stopped and started app again."
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiJ9.eyJkb3NzaWVySWQiOiIxX18xY2JhOGQwNC1mNjg1LTQ4NTctYjFjOS1kMzI1ZDY1ZGIxNDUiLCJjbGllbnRJZCI6ImN1c3RvbXdlYi1iYXNpYyIsImV4cCI6MTY2ODUwNzM3NTAwMCwiaWF0IjoxNjY3OTAyNTc1MDAwLCJzdWIiOiJiNGYxNzEyMC01NjM5LTRiOTctOWMzYS05NTQ1YzRiN2FhYzciLCJpc3MiOiJzbmFwc3dhcC1tb2NrIn0.e0lfOSVgVraz_rPs56cJ_nPZSu3EMVJmSMlCicU-Mqg",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

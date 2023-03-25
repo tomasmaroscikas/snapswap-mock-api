@@ -4,6 +4,22 @@ This is a standalone application which emulates SnapSwap RKYC API. Diagram below
 
 ![Interaction between Portal and this App](doc/PayFac.SnapSwap.RKYC.Mock.svg "Interaction between Poratl and App")
 
+## How to get started?
+
+In io.wallee.payment.facilitator.snapswap project
+- Change URL in SnapSwapEnvironment.java for DEVELOPMENT environment to https://localhost:8443/snapswap/mock
+- Start the project
+
+In SnapSwap mock project
+- Start application
+```shell ./gradlew run```
+
+## How to use?
+
+- Do PayFac onboarding as usual
+- Use [Postman Collection](PayFac.SnapSwap.RKYC.API_with_mocking_endpoints.postman_collection.json) to simulate responses from SnapSwap
+- Use [this link](https://localhost:8443/snapswap/mock/api/v1/dossier/list) to inspect SnapSwap state
+
 ## Technical details
 
 ### Micronaut 3.7.3 Documentation
