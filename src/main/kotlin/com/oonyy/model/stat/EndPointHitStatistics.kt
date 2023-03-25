@@ -7,6 +7,7 @@ data class EndPointHitStatistics(
     var residentialAddressHitCount: Int = 0,
     var questionsHitCount: Int = 0,
     var documentsHitCount: Int = 0,
+    var documentsUboHitCount: Int = 0,
     var amlRequestCount: Int = 0,
     var customerCount: Int = 0,
     var taxCount: Int = 0,
@@ -14,5 +15,6 @@ data class EndPointHitStatistics(
     var deliverySentCount: Int = 0,
     var cancelRepresentativeIdDocumentCount: Int = 0,
     var initRepresentativeIdDocumentVerificationCount: Int = 0,
+    var finalizeRepresentativeIdDocumentVerificationCount: Int = 0,
     var addFailureCount: Int = 0
 )

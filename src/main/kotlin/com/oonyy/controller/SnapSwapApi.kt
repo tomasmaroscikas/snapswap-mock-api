@@ -218,12 +218,12 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Error(status = HttpStatus.BAD_REQUEST)
-    fun badRequest(request: HttpRequest<*>): HttpResponse<SnapSwapError> { //
-        val error = SnapSwapError("https://rkyc.snapswap.vc/api/errors/check-failed", "Check failed", 400, "Phone type 'invalid' not allowed")
-        return HttpResponse.badRequest<SnapSwapError>()
-            .body(error)
-    }
+//    @Error(status = HttpStatus.BAD_REQUEST)
+//    fun badRequest(request: HttpRequest<*>): HttpResponse<SnapSwapError> { //
+//        val error = SnapSwapError("https://rkyc.snapswap.vc/api/errors/check-failed", "Check failed", 400, "Phone type 'invalid' not allowed")
+//        return HttpResponse.badRequest<SnapSwapError>()
+//            .body(error)
+//    }
 
     @Post("$ENDPOINT_PREFIX/phone/confirmation")
     fun confirmPhone(content: PhoneConfirmationData): String {
@@ -272,7 +272,6 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         endPointHitStatistics.residentialAddressHitCount++
         return if (state.containsKey(dossierKey)) {
             handleResidentialAddress(state[dossierKey], content)
-            logger.warn("This shouldn't be here 1")
             HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
@@ -285,14 +284,6 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
             // add to dedicated entity
             dossierData?.residentialAddress =
                 DossierResidentialAddress(content.country, content.region, content.city, content.postalCode, content.streetAddress, DossierEntryState.PENDING)
-
-            // add entry to document
-            dossierData?.documents?.add(
-                DossierDocument(
-                    documentType = DossierDocumentType.RESIDENTIAL_ADDRESS,
-                    state = DossierEntryState.PENDING
-                )
-            )
         }
     }
 
@@ -345,6 +336,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
                     state[dossierKey]?.documents?.add(
                         DossierDocument(
                             documentType = DossierDocumentType.QUESTIONS,
+                            evidenceOf = DossierDocumentType.QUESTIONS,
                             state = DossierEntryState.PENDING
                         )
                     )
@@ -356,26 +348,51 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         }
     }
 
-    @Post(value = "$ENDPOINT_PREFIX/documents/questions/{documentType}/{questionId}", consumes = [MULTIPART_FORM_DATA])
+    /**
+     * We call this when upload representative residential address document
+     */
+    @Post(value = "$ENDPOINT_PREFIX/documents/{evidenceFor}/{documentType}", consumes = [MULTIPART_FORM_DATA])
     fun addDocument(
         @Header(AUTHORIZATION) jwtTokenString: String,
+        @PathVariable evidenceFor: String,
         @PathVariable documentType: String,
-        @PathVariable questionId: String,
         @Body file: ByteArray
     ): HttpResponse<DossierStatus> {
-        logger.debug("Received POST request to $ENDPOINT_PREFIX/documents/questions/$documentType/$questionId")
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/documents/$evidenceFor/$documentType")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         endPointHitStatistics.documentsHitCount++
         return if (state.containsKey(dossierKey)) {
-            // TODO not sure if we call this endpoint
             state[dossierKey]?.documents?.add(
                 DossierDocument(
-                    documentType = DossierDocumentType.RESIDENTIAL_ADDRESS,
+                    documentType = DossierDocumentType.valueOf(documentType.uppercase()),
+                    evidenceOf = DossierDocumentType.valueOf(evidenceFor.uppercase()),
                     state = DossierEntryState.PENDING
                 )
             )
             logger.warn("This shouldn't be here 2")
+            HttpResponse.ok(DossierStatus.of(state[dossierKey]))
+        } else {
+            HttpResponse.notFound()
+        }
+    }
+
+    /**
+     * We call this when UBO provides identity document. That part consists of two parts and this is the second one. The first one is {@link #addQuestions()}
+     */
+    @Post(value = "$ENDPOINT_PREFIX/documents/questions/{documentType}/{questionId}", consumes = [MULTIPART_FORM_DATA])
+    fun addUboDocument(
+        @Header(AUTHORIZATION) jwtTokenString: String,
+        @PathVariable questionId: String,
+        @PathVariable documentType: String,
+        @Body file: ByteArray
+    ): HttpResponse<DossierStatus> {
+        logger.debug("Received POST request to $ENDPOINT_PREFIX/documents/$questionId/$documentType")
+        val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
+        val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
+        endPointHitStatistics.documentsUboHitCount++
+        return if (state.containsKey(dossierKey)) {
+            // Do nothing
             HttpResponse.ok(DossierStatus.of(state[dossierKey]))
         } else {
             HttpResponse.notFound()
@@ -397,17 +414,41 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
         return if (state.containsKey(dossierKey)) {
             state[dossierKey]?.finalizeUrl = data["redirect_url"]
-            HttpResponse.ok(RepresentativeIdDocumentProcess("https://localhost:8443/$ID_DOCUMENT_FINALIZE", "jumioScanRefrenceFake", "-1"))
+            HttpResponse.ok(RepresentativeIdDocumentProcess("https://localhost:8443/$ID_DOCUMENT_FINALIZE?dossierId=${dossierKey.dossierId}&clientId=${dossierJwtPayload.clientId}", "jumioScanRefrenceFake", "-1"))
         } else {
             HttpResponse.notFound()
         }
     }
 
     @Get("/api/v1/dossier/id_document/finalize")
-    @Produces(MediaType.TEXT_PLAIN)
-    fun finalizeRepresentativeIdDocumentProcess(): HttpResponse<String> {
+    @Produces(MediaType.TEXT_HTML)
+    fun finalizeRepresentativeIdDocumentProcess(@QueryValue dossierId: String, @QueryValue clientId: String): HttpResponse<String> {
         logger.debug("Received GET request to $ID_DOCUMENT_FINALIZE")
-        return HttpResponse.ok("You can trigger finalize upload using Postman")
+        endPointHitStatistics.finalizeRepresentativeIdDocumentVerificationCount++
+        val dossierKey = DossierKey(dossierId, clientId)
+        val dossierData = state[dossierKey]
+        val instructionToEndUser = """
+            |<html>
+            |<head>
+            |<title>Jumio response Mock</title>
+            |</head>
+            |<body>
+            |<h1>Short story</h1>
+            |<p>Click <a href="${dossierData?.finalizeUrl}?transactionStatus=SUCCESS">here</a> to complete Jumio
+            |
+            |<h1>Long story</h1>
+            |
+            |<p>Jumio 'thing' which happens in the popup window takes photos and then issues callback to the Portal with SUCCESS or FAILURE to indicate that they collected or failed to collect data for processing. At this point we don't have representative ID verification results yet. The result will come as part of Dossier status, check limited Dossier entry 'id_document'.
+            |
+            |<p>In this page we only simulate photo capturing result.
+            |
+            |<p>Best,
+            |<p>Tomas
+            |
+            |</body>
+            |</html>
+            |""".trimMargin()
+        return HttpResponse.ok(instructionToEndUser)
     }
 
     /**
@@ -431,7 +472,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
         return if (state.containsKey(dossierKey)) {
 
             // TODO construct DossierDataWithAml
-            var dossierDataWithAml = DossierDataWithAml(state[dossierKey]!!, AmlGenerator.generateAml())
+            var dossierDataWithAml = DossierDataWithAml(state[dossierKey]!!, AmlGenerator.generateAml(state[dossierKey]!!.type))
 
             /*if (dossierDeliveryOptions.amlHits) {
                 // TODO: take dossier data and append with AML hits
@@ -448,7 +489,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
             logger.debug("END Encryption")
 
             logger.debug("START Send delivery to Portal")
-            portalClient.sendDossierDelivery(com.oonyy.properties.Properties.DOSSIER_DELIVERY_AUTH_HEADER_VALUE, SnapSwapEnvironment.DEVELOPMENT, DossierType.LIMITED, encryptedDossier)
+            portalClient.sendDossierDelivery(com.oonyy.properties.Properties.DOSSIER_DELIVERY_AUTH_HEADER_VALUE, SnapSwapEnvironment.DEVELOPMENT, state[dossierKey]!!.type, encryptedDossier)
             logger.debug("END Send delivery to Portal")
 
             HttpStatus.OK
@@ -483,7 +524,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
     }
 
     @Post("$ENDPOINT_PREFIX/status")
-    fun updateStatus(@Header(AUTHORIZATION) jwtTokenString: String, statusUpdateData: StatusUpdateData): HttpStatus {
+    fun updateStatus(@Header(AUTHORIZATION) jwtTokenString: String, @Body statusUpdateData: StatusUpdateData): HttpStatus {
         logger.debug("Status update request $statusUpdateData")
         val dossierJwtPayload = DossierJwtParser.parse(jwtTokenString)
         val dossierKey = DossierKey(dossierJwtPayload.dossierId, dossierJwtPayload.clientId)
@@ -496,7 +537,7 @@ class SnapSwapApi(private val portalClient: PortalClient, private val persistenc
                 "consistency" -> state[dossierKey]?.consistency = statusUpdateData.status
                 "delivery" -> state[dossierKey]?.delivery = statusUpdateData.status
                 "id_document" -> state[dossierKey]?.idDocument?.state = statusUpdateData.status
-                    "residential_address_document" -> state[dossierKey]?.documents?.filter { it.documentType == DossierDocumentType.RESIDENTIAL_ADDRESS }
+                    "residential_address_document" -> state[dossierKey]?.documents?.filter { it.evidenceOf == DossierDocumentType.RESIDENTIAL_ADDRESS }
                     ?.forEach { it.state = statusUpdateData.status }
                 "document_questions" -> state[dossierKey]?.documents?.filter { it.documentType == DossierDocumentType.QUESTIONS }
                     ?.forEach { it.state = statusUpdateData.status }
